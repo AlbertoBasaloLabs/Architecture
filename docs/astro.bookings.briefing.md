@@ -299,6 +299,8 @@ Los descuentos se aplican según las siguientes condiciones, evaluadas en orden 
 - Campo obligatorio faltante
 - Formato de datos inválido
 - Violación de reglas de negocio (capacidad excedida, fecha inválida, etc.)
+
+### Errores de Existencia (404 Not Found)
 - Referencia a entidad inexistente (cohete o vuelo no encontrado)
 
 ### Errores del Servidor (500 Internal Server Error)
