@@ -8,6 +8,7 @@ import com.astrobookings.model.FlightStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 public class FlightService {
     // BAD SMELL: Direct instantiation (no dependency injection)
@@ -68,7 +69,7 @@ public class FlightService {
         }
 
         // Create flight with auto-generated ID
-        String id = java.util.UUID.randomUUID().toString();
+        String id = UUID.randomUUID().toString();
         Flight flight = new Flight(
             id,
             rocketId,
