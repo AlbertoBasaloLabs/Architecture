@@ -11,6 +11,10 @@ public class BookingRepository {
     private static final Map<String, Booking> db = new HashMap<>();
 
     public Booking save(Booking booking) {
+        // Assign a new ID if missing
+        if (booking.getId() == null) {
+            booking.setId(java.util.UUID.randomUUID().toString());
+        }
         db.put(booking.getId(), booking);
         return booking;
     }

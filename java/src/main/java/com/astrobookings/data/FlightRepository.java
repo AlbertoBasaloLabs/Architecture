@@ -14,12 +14,16 @@ public class FlightRepository {
     static {
         // Dummy data
         Flight f1 = new Flight("f1", "r1", LocalDateTime.now().plusDays(40), 5000.0, 5, FlightStatus.SCHEDULED);
-        Flight f2 = new Flight("f2", "r1", LocalDateTime.now().plusDays(10), 6000.0, 5, FlightStatus.SCHEDULED);
+        Flight f2 = new Flight("f2", "r1", LocalDateTime.now().plusDays(10), 6000.0, 5, FlightStatus.CANCELLED);
         db.put(f1.getId(), f1);
         db.put(f2.getId(), f2);
     }
 
     public Flight save(Flight flight) {
+        // Assign a new ID if missing
+        if (flight.getId() == null) {
+            flight.setId(java.util.UUID.randomUUID().toString());
+        }
         db.put(flight.getId(), flight);
         return flight;
     }
