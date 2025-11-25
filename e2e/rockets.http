@@ -1,0 +1,45 @@
+# E2E tests for Rocket endpoints (VS Code REST Client)
+
+### Get all rockets (should be have one hard-coded rocket)
+GET http://localhost:8080/rockets
+Accept: application/json
+
+### Create a new rocket (valid payload)
+POST http://localhost:8080/rockets
+Content-Type: application/json
+
+{
+  "name": "Starship",
+  "capacity": 5
+}
+
+### Get all rockets (should contain the newly created rocket)
+GET http://localhost:8080/rockets
+Accept: application/json
+
+### Create a rocket with missing name (error case)
+POST http://localhost:8080/rockets
+Content-Type: application/json
+
+{
+  "capacity": 3
+}
+
+### Create a rocket with duplicate ID (error case) - using explicit ID
+POST http://localhost:8080/rockets
+Content-Type: application/json
+
+{
+  "id": "r1",
+  "name": "Duplicate Rocket",
+  "capacity": 2
+}
+
+### Create a rocket with unsoported capacity (error case)
+POST http://localhost:8080/rockets
+Content-Type: application/json
+
+{
+  "name": "Unsoported Rocket",
+  "capacity": 11
+}

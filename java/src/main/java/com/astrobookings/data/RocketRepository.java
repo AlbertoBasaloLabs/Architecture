@@ -16,13 +16,26 @@ public class RocketRepository {
     }
 
     public Rocket save(Rocket rocket) {
-        // BAD SMELL: Business logic in Repository
+        // Validate name
+        if (rocket.getName() == null || rocket.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Rocket name must be provided");
+        }
+        // Validate capacity (existing rule)
         if (rocket.getCapacity() > 10) {
             throw new IllegalArgumentException("Rocket capacity cannot exceed 10");
+        }
+        // Validate duplicate ID
+        if (rocket.getId() != null && db.containsKey(rocket.getId())) {
+            throw new IllegalArgumentException("Rocket with id " + rocket.getId() + " already exists");
+        }
+        // Assign a new ID if missing
+        if (rocket.getId() == null) {
+            rocket.setId(java.util.UUID.randomUUID().toString());
         }
         db.put(rocket.getId(), rocket);
         return rocket;
     }
+
 
     public Optional<Rocket> findById(String id) {
         return Optional.ofNullable(db.get(id));
