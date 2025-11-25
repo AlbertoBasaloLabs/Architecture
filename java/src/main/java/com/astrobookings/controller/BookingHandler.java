@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class BookingHandler extends BaseHandler implements HttpHandler {
     private BookingService bookingService = new BookingService();
@@ -35,12 +37,12 @@ public class BookingHandler extends BaseHandler implements HttpHandler {
         String passengerName = queryParams.get("passengerName");
 
         // BAD SMELL: Controller accessing repository directly to filter!
-        java.util.List<Booking> bookings = bookingService.findAllBookings();
+        List<Booking> bookings = bookingService.findAllBookings();
         
-        java.util.List<Booking> filtered = bookings.stream()
+        List<Booking> filtered = bookings.stream()
             .filter(b -> flightId == null || b.getFlightId().equals(flightId))
             .filter(b -> passengerName == null || b.getPassengerName().equals(passengerName))
-            .collect(java.util.stream.Collectors.toList());
+            .collect(Collectors.toList());
 
         sendJsonResponse(exchange, 200, filtered);
     }

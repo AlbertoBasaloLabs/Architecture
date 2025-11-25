@@ -7,8 +7,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 public class RocketHandler extends BaseHandler implements HttpHandler {
     // BAD SMELL: Controller accessing Repository directly (No Service layer)
@@ -33,7 +34,7 @@ public class RocketHandler extends BaseHandler implements HttpHandler {
 
     private void handlePost(HttpExchange exchange) throws IOException {
         try {
-            java.io.InputStream is = exchange.getRequestBody();
+            InputStream is = exchange.getRequestBody();
             Rocket rocket = objectMapper.readValue(is, Rocket.class);
             
             if (rocket.getName() == null || rocket.getName().trim().isEmpty()) {

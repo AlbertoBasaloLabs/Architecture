@@ -9,8 +9,11 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 public class FlightHandler extends BaseHandler implements HttpHandler {
     private FlightService flightService = new FlightService();
@@ -36,8 +39,8 @@ public class FlightHandler extends BaseHandler implements HttpHandler {
 
     private void handlePost(HttpExchange exchange) throws IOException {
         try {
-            java.io.InputStream is = exchange.getRequestBody();
-            java.util.Map<String, Object> body = objectMapper.readValue(is, java.util.Map.class);
+            InputStream is = exchange.getRequestBody();
+            Map<String, Object> body = objectMapper.readValue(is, Map.class);
             
             String rocketId = (String) body.get("rocketId");
             String dateStr = (String) body.get("departureDate");
@@ -45,8 +48,8 @@ public class FlightHandler extends BaseHandler implements HttpHandler {
             
             validateFlightInput(rocketId, dateStr, basePriceObj);
             
-            Double basePrice = ((Number) basePriceObj).doubleValue();
-            java.time.LocalDateTime departureDate = parseDate(dateStr);
+            double basePrice = ((Number) basePriceObj).doubleValue();
+            LocalDateTime departureDate = parseDate(dateStr);
             
             Flight flight = flightService.createFlight(rocketId, departureDate, basePrice);
             
@@ -84,10 +87,10 @@ public class FlightHandler extends BaseHandler implements HttpHandler {
         }
     }
 
-    private java.time.LocalDateTime parseDate(String dateStr) {
+    private LocalDateTime parseDate(String dateStr) {
         try {
-            return java.time.LocalDateTime.parse(dateStr);
-        } catch (java.time.format.DateTimeParseException e) {
+            return LocalDateTime.parse(dateStr);
+        } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("Invalid departure date format");
         }
     }

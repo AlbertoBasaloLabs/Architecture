@@ -12,9 +12,6 @@ import java.util.Map;
 
 /**
  * Base handler with common utilities for all HTTP handlers.
- * BAD SMELL: This is a utility class that reduces code duplication,
- * but the handlers still have architectural problems (direct repository access,
- * business logic in controllers, etc.)
  */
 public abstract class BaseHandler {
     protected final ObjectMapper objectMapper;
