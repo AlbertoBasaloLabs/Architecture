@@ -14,10 +14,16 @@ public class FlightRepository {
 
     static {
         // Dummy data
-        Flight f1 = new Flight("f1", "r1", LocalDateTime.now().plusDays(40), 5000.0, 5, FlightStatus.SCHEDULED);
-        Flight f2 = new Flight("f2", "r1", LocalDateTime.now().plusDays(10), 6000.0, 5, FlightStatus.CANCELLED);
+        var dummyRocketId = "00000000-0000-0000-0000-000000000001";
+        var dummyFlight1Id = "10000000-0000-0000-0000-000000000001";
+        Flight f1 = new Flight(dummyFlight1Id, dummyRocketId, LocalDateTime.now().plusDays(40), 5000.0, 5, FlightStatus.SCHEDULED);
+        var dummyFlight2Id = "10000000-0000-0000-0000-000000000002";
+        Flight f2 = new Flight(dummyFlight2Id, dummyRocketId, LocalDateTime.now().plusDays(10), 6000.0, 5, FlightStatus.SCHEDULED);
+        var dummyFlight3Id = "10000000-0000-0000-0000-000000000003";
+        Flight f3 = new Flight(dummyFlight3Id, dummyRocketId, LocalDateTime.now().plusDays(10), 6000.0, 5, FlightStatus.CANCELLED);
         db.put(f1.getId(), f1);
         db.put(f2.getId(), f2);
+        db.put(f3.getId(), f3);
     }
 
     public Flight save(Flight flight) {

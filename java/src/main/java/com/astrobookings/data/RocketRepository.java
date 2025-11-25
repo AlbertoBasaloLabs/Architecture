@@ -12,8 +12,9 @@ public class RocketRepository {
 
     static {
         // Dummy data
-        Rocket r1 = new Rocket("r1", "Falcon 9", 10, 25000.0);
-        db.put(r1.getId(), r1);
+        var dummyId = "00000000-0000-0000-0000-000000000001";
+        Rocket r1 = new Rocket(dummyId, "Falcon 9", 10, 25000.0);
+        db.put(dummyId, r1);
     }
 
     public Rocket save(Rocket rocket) {
