@@ -11,3 +11,4 @@ com\astrobookings\data\RocketRepository.class
 com\astrobookings\controller\RocketHandler.class
 com\astrobookings\model\Booking.class
 com\astrobookings\model\FlightStatus.class
+com\astrobookings\controller\BaseHandler.class

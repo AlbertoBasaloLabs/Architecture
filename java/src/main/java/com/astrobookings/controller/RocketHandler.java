@@ -10,49 +10,45 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-public class RocketHandler implements HttpHandler {
+public class RocketHandler extends BaseHandler implements HttpHandler {
     // BAD SMELL: Controller accessing Repository directly (No Service layer)
     private RocketRepository rocketRepository = new RocketRepository();
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if ("GET".equals(exchange.getRequestMethod())) {
-            List<Rocket> rockets = rocketRepository.findAll();
-            String response = objectMapper.writeValueAsString(rockets);
+        String method = exchange.getRequestMethod();
+        
+        switch (method) {
+            case "GET" -> handleGet(exchange);
+            case "POST" -> handlePost(exchange);
+            default -> exchange.sendResponseHeaders(405, -1);
+        }
+    }
 
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(200, response.length());
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        } else if ("POST".equals(exchange.getRequestMethod())) {
-            try {
-                java.io.InputStream is = exchange.getRequestBody();
-                Rocket rocket = objectMapper.readValue(is, Rocket.class);
-                if (rocket.getId() == null) rocket.setId(java.util.UUID.randomUUID().toString());
-                
-                rocketRepository.save(rocket);
-                
-                String response = objectMapper.writeValueAsString(rocket);
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(201, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            } catch (IllegalArgumentException e) {
-                String response = "{\"error\": \"" + e.getMessage() + "\"}";
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(400, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-                exchange.sendResponseHeaders(500, -1);
+    private void handleGet(HttpExchange exchange) throws IOException {
+        List<Rocket> rockets = rocketRepository.findAll();
+        String response = objectMapper.writeValueAsString(rockets);
+        sendJsonResponse(exchange, 200, response);
+    }
+
+    private void handlePost(HttpExchange exchange) throws IOException {
+        try {
+            java.io.InputStream is = exchange.getRequestBody();
+            Rocket rocket = objectMapper.readValue(is, Rocket.class);
+            if (rocket.getId() == null) {
+                rocket.setId(java.util.UUID.randomUUID().toString());
             }
-        } else {
-            exchange.sendResponseHeaders(405, -1);
+            
+            rocketRepository.save(rocket);
+            
+            String response = objectMapper.writeValueAsString(rocket);
+            sendJsonResponse(exchange, 201, response);
+        } catch (IllegalArgumentException e) {
+            String errorResponse = "{\"error\": \"" + e.getMessage() + "\"}";
+            sendJsonResponse(exchange, 400, errorResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1);
         }
     }
 }

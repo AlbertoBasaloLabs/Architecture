@@ -13,107 +13,71 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-public class BookingHandler implements HttpHandler {
+public class BookingHandler extends BaseHandler implements HttpHandler {
     private BookingService bookingService = new BookingService();
-    private ObjectMapper objectMapper = new ObjectMapper();
-
-    public BookingHandler() {
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if ("GET".equals(exchange.getRequestMethod())) {
-            // BAD SMELL: Logic inside Controller (Smart Controller)
-            // BAD SMELL: Inconsistent query parsing (using split vs regex or library)
-            String query = exchange.getRequestURI().getQuery();
-            String flightId = null;
-            String passengerName = null;
-
-            if (query != null) {
-                String[] pairs = query.split("&");
-                for (String pair : pairs) {
-                    String[] kv = pair.split("=");
-                    if (kv.length == 2) {
-                        if ("flightId".equals(kv[0])) flightId = kv[1];
-                        else if ("passengerName".equals(kv[0])) passengerName = kv[1];
-                    }
-                }
-            }
-
-            // BAD SMELL: Controller accessing repository directly to filter!
-            // We need to access the repository. Since BookingService has it private, 
-            // we'll instantiate a new Repository here (even worse!).
-            // Ideally we should ask the service, but we want to show inconsistency.
-            // Let's assume we add a method to Service to "findAll" and filter here.
-            
-            java.util.List<Booking> bookings = bookingService.findAllBookings();
-            
-            final String fId = flightId;
-            final String pName = passengerName;
-
-            java.util.List<Booking> filtered = bookings.stream()
-                .filter(b -> fId == null || b.getFlightId().equals(fId))
-                .filter(b -> pName == null || b.getPassengerName().equals(pName))
-                .collect(java.util.stream.Collectors.toList());
-
-            String response = objectMapper.writeValueAsString(filtered);
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            sendResponse(exchange, 200, response);
-
-        } else if ("POST".equals(exchange.getRequestMethod())) {
-            try {
-                InputStream is = exchange.getRequestBody();
-                Map<String, String> body = objectMapper.readValue(is, Map.class);
-                
-                String flightId = body.get("flightId");
-                String passengerName = body.get("passengerName");
-
-                // BAD SMELL: Validation in controller
-                if (flightId == null || flightId.isEmpty()) {
-                    sendResponse(exchange, 400, "Flight id is required");
-                    return;
-                }
-                
-                if (passengerName == null || passengerName.isEmpty()) {
-                    sendResponse(exchange, 400, "Passenger name is required");
-                    return;
-                }
-
-                Booking booking = bookingService.createBooking(flightId, passengerName);
-                String response = objectMapper.writeValueAsString(booking);
-
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                sendResponse(exchange, 200, response);
-
-            } catch (IllegalArgumentException e) {
-                // BAD SMELL: Catching domain exceptions in controller
-                String errorJson = "{\"error\": \"" + e.getMessage() + "\"}";
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                sendResponse(exchange, 400, errorJson);
-            } catch (RuntimeException e) {
-                // BAD SMELL: Using RuntimeException for business logic errors
-                // Catch specific business errors (Flight not found, Flight is full)
-                e.printStackTrace();
-                String errorJson = "{\"error\": \"" + e.getMessage() + "\"}";
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                sendResponse(exchange, 400, errorJson);
-            } catch (Exception e) {
-                e.printStackTrace();
-                String errorJson = "{\"error\": \"Internal server error\"}";
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                sendResponse(exchange, 500, errorJson);
-            }
-        } else {
-            exchange.sendResponseHeaders(405, -1);
+        String method = exchange.getRequestMethod();
+        
+        switch (method) {
+            case "GET" -> handleGet(exchange);
+            case "POST" -> handlePost(exchange);
+            default -> exchange.sendResponseHeaders(405, -1);
         }
     }
 
-    private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
-        exchange.sendResponseHeaders(statusCode, response.length());
-        OutputStream os = exchange.getResponseBody();
-        os.write(response.getBytes());
-        os.close();
+    private void handleGet(HttpExchange exchange) throws IOException {
+        // BAD SMELL: Logic inside Controller (Smart Controller)
+        Map<String, String> queryParams = parseQueryParams(exchange.getRequestURI().getQuery());
+        
+        String flightId = queryParams.get("flightId");
+        String passengerName = queryParams.get("passengerName");
+
+        // BAD SMELL: Controller accessing repository directly to filter!
+        java.util.List<Booking> bookings = bookingService.findAllBookings();
+        
+        java.util.List<Booking> filtered = bookings.stream()
+            .filter(b -> flightId == null || b.getFlightId().equals(flightId))
+            .filter(b -> passengerName == null || b.getPassengerName().equals(passengerName))
+            .collect(java.util.stream.Collectors.toList());
+
+        sendJsonResponse(exchange, 200, filtered);
+    }
+
+    private void handlePost(HttpExchange exchange) throws IOException {
+        try {
+            InputStream is = exchange.getRequestBody();
+            Map<String, String> body = objectMapper.readValue(is, Map.class);
+            
+            String flightId = body.get("flightId");
+            String passengerName = body.get("passengerName");
+
+            // BAD SMELL: Validation in controller
+            validateBookingInput(flightId, passengerName);
+
+            Booking booking = bookingService.createBooking(flightId, passengerName);
+            sendJsonResponse(exchange, 200, booking);
+
+        } catch (IllegalArgumentException e) {
+            // BAD SMELL: Catching domain exceptions in controller
+            handleError(exchange, 400, e.getMessage());
+        } catch (RuntimeException e) {
+            // BAD SMELL: Using RuntimeException for business logic errors
+            handleError(exchange, 400, e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            handleError(exchange, 500, "Internal server error");
+        }
+    }
+
+    private void validateBookingInput(String flightId, String passengerName) {
+        if (flightId == null || flightId.isEmpty()) {
+            throw new IllegalArgumentException("Flight id is required");
+        }
+        
+        if (passengerName == null || passengerName.isEmpty()) {
+            throw new IllegalArgumentException("Passenger name is required");
+        }
     }
 }

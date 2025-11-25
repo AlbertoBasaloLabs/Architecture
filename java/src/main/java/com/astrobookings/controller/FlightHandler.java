@@ -12,88 +12,83 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-public class FlightHandler implements HttpHandler {
+public class FlightHandler extends BaseHandler implements HttpHandler {
     private FlightService flightService = new FlightService();
-    private ObjectMapper objectMapper = new ObjectMapper();
-
-    public FlightHandler() {
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if ("GET".equals(exchange.getRequestMethod())) {
-            String query = exchange.getRequestURI().getQuery();
-            String status = null;
-            // Manual parsing of query params (Inconsistent with other handlers if we had a library)
-            if (query != null && query.contains("status=")) {
-                String[] parts = query.split("status=");
-                if (parts.length > 1) {
-                    status = parts[1].split("&")[0];
-                }
-            }
+        String method = exchange.getRequestMethod();
+        
+        switch (method) {
+            case "GET" -> handleGet(exchange);
+            case "POST" -> handlePost(exchange);
+            default -> exchange.sendResponseHeaders(405, -1);
+        }
+    }
 
-            List<Flight> flights = flightService.getAvailableFlights(status);
-            String response = objectMapper.writeValueAsString(flights);
+    private void handleGet(HttpExchange exchange) throws IOException {
+        String query = exchange.getRequestURI().getQuery();
+        String status = parseStatusParam(query);
 
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(200, response.length());
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        } else if ("POST".equals(exchange.getRequestMethod())) {
-            try {
-                java.io.InputStream is = exchange.getRequestBody();
-                // We expect a map or a DTO, but let's use a Map for simplicity/dirtyness
-                java.util.Map<String, Object> body = objectMapper.readValue(is, java.util.Map.class);
-                
-                String rocketId = (String) body.get("rocketId");
-                if (rocketId == null || rocketId.trim().isEmpty()) {
-                    throw new IllegalArgumentException("Rocket id must be provided");
-                }
-                
-                // Validate departureDate exists
-                String dateStr = (String) body.get("departureDate");
-                if (dateStr == null || dateStr.trim().isEmpty()) {
-                    throw new IllegalArgumentException("Departure date must be provided");
-                }
-                
-                // Validate basePrice exists
-                Object basePriceObj = body.get("basePrice");
-                if (basePriceObj == null) {
-                    throw new IllegalArgumentException("Base price must be provided");
-                }
-                Double basePrice = ((Number) basePriceObj).doubleValue();
-                
-                java.time.LocalDateTime departureDate;
-                try {
-                    departureDate = java.time.LocalDateTime.parse(dateStr);
-                } catch (java.time.format.DateTimeParseException e) {
-                    throw new IllegalArgumentException("Invalid departure date format");
-                }
-                
-                Flight flight = flightService.createFlight(rocketId, departureDate, basePrice);
-                
-                String response = objectMapper.writeValueAsString(flight);
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(201, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            } catch (IllegalArgumentException e) {
-                String response = "{\"error\": \"" + e.getMessage() + "\"}";
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(400, response.length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(response.getBytes());
-                os.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-                exchange.sendResponseHeaders(500, -1);
+        List<Flight> flights = flightService.getAvailableFlights(status);
+        sendJsonResponse(exchange, 200, flights);
+    }
+
+    private void handlePost(HttpExchange exchange) throws IOException {
+        try {
+            java.io.InputStream is = exchange.getRequestBody();
+            java.util.Map<String, Object> body = objectMapper.readValue(is, java.util.Map.class);
+            
+            String rocketId = (String) body.get("rocketId");
+            String dateStr = (String) body.get("departureDate");
+            Object basePriceObj = body.get("basePrice");
+            
+            validateFlightInput(rocketId, dateStr, basePriceObj);
+            
+            Double basePrice = ((Number) basePriceObj).doubleValue();
+            java.time.LocalDateTime departureDate = parseDate(dateStr);
+            
+            Flight flight = flightService.createFlight(rocketId, departureDate, basePrice);
+            
+            sendJsonResponse(exchange, 201, flight);
+        } catch (IllegalArgumentException e) {
+            handleError(exchange, 400, e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            exchange.sendResponseHeaders(500, -1);
+        }
+    }
+
+    private String parseStatusParam(String query) {
+        // Manual parsing of query params (Inconsistent with other handlers if we had a library)
+        if (query != null && query.contains("status=")) {
+            String[] parts = query.split("status=");
+            if (parts.length > 1) {
+                return parts[1].split("&")[0];
             }
-        } else {
-            exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+        }
+        return null;
+    }
+
+    private void validateFlightInput(String rocketId, String dateStr, Object basePriceObj) {
+        if (rocketId == null || rocketId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Rocket id must be provided");
+        }
+        
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("Departure date must be provided");
+        }
+        
+        if (basePriceObj == null) {
+            throw new IllegalArgumentException("Base price must be provided");
+        }
+    }
+
+    private java.time.LocalDateTime parseDate(String dateStr) {
+        try {
+            return java.time.LocalDateTime.parse(dateStr);
+        } catch (java.time.format.DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid departure date format");
         }
     }
 }
