@@ -24,6 +24,11 @@ public class BookingService {
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new RuntimeException("Flight not found"));
 
+        // Check status
+        if (flight.getStatus() == FlightStatus.SOLD_OUT || flight.getStatus() == FlightStatus.CANCELLED) {
+             throw new RuntimeException("Cannot book this flight. Status is " + flight.getStatus());
+        }
+
         // 2. Get Rocket
         Rocket rocket = rocketRepository.findById(flight.getRocketId())
                 .orElseThrow(() -> new RuntimeException("Rocket not found"));
@@ -53,11 +58,25 @@ public class BookingService {
         // 6. Save Booking
         bookingRepository.save(booking);
 
-        // 7. Side Effect: Check minPassengers
+        // 7. Side Effect: Check minPassengers and Capacity
         // BAD SMELL: Re-fetching bookings to include the new one
         List<Booking> updatedBookings = bookingRepository.findByFlightId(flightId);
+        
+        boolean statusChanged = false;
+
+        // Transition to CONFIRMED
         if (updatedBookings.size() >= flight.getMinPassengers() && flight.getStatus() == FlightStatus.SCHEDULED) {
             flight.setStatus(FlightStatus.CONFIRMED);
+            statusChanged = true;
+        }
+        
+        // Transition to SOLD_OUT
+        if (updatedBookings.size() >= rocket.getCapacity()) {
+            flight.setStatus(FlightStatus.SOLD_OUT);
+            statusChanged = true;
+        }
+
+        if (statusChanged) {
             flightRepository.save(flight);
         }
 

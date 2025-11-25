@@ -35,6 +35,17 @@ public class RocketHandler extends BaseHandler implements HttpHandler {
         try {
             java.io.InputStream is = exchange.getRequestBody();
             Rocket rocket = objectMapper.readValue(is, Rocket.class);
+            
+            if (rocket.getName() == null || rocket.getName().trim().isEmpty()) {
+                throw new IllegalArgumentException("Rocket name cannot be empty");
+            }
+            if (rocket.getCapacity() <= 0) {
+                throw new IllegalArgumentException("Rocket capacity must be greater than 0");
+            }
+            if (rocket.getSpeed() != null && rocket.getSpeed() <= 0) {
+                throw new IllegalArgumentException("Rocket speed must be greater than 0");
+            }
+
             if (rocket.getId() == null) {
                 rocket.setId(java.util.UUID.randomUUID().toString());
             }

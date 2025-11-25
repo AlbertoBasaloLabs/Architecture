@@ -57,7 +57,7 @@ public class BookingHandler extends BaseHandler implements HttpHandler {
             validateBookingInput(flightId, passengerName);
 
             Booking booking = bookingService.createBooking(flightId, passengerName);
-            sendJsonResponse(exchange, 200, booking);
+            sendJsonResponse(exchange, 201, booking);
 
         } catch (IllegalArgumentException e) {
             // BAD SMELL: Catching domain exceptions in controller

@@ -4,11 +4,11 @@ public class Rocket {
     private String id;
     private String name;
     private int capacity;
-    private double speed;
+    private Double speed;
 
     public Rocket() {}
 
-    public Rocket(String id, String name, int capacity, double speed) {
+    public Rocket(String id, String name, int capacity, Double speed) {
         this.id = id;
         this.name = name;
         this.capacity = capacity;
@@ -24,6 +24,6 @@ public class Rocket {
     public int getCapacity() { return capacity; }
     public void setCapacity(int capacity) { this.capacity = capacity; }
 
-    public double getSpeed() { return speed; }
-    public void setSpeed(double speed) { this.speed = speed; }
+    public Double getSpeed() { return speed; }
+    public void setSpeed(Double speed) { this.speed = speed; }
 }
