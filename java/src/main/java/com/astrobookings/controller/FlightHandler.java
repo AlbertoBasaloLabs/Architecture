@@ -42,6 +42,37 @@ public class FlightHandler implements HttpHandler {
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
+        } else if ("POST".equals(exchange.getRequestMethod())) {
+            try {
+                java.io.InputStream is = exchange.getRequestBody();
+                // We expect a map or a DTO, but let's use a Map for simplicity/dirtyness
+                java.util.Map<String, Object> body = objectMapper.readValue(is, java.util.Map.class);
+                
+                String rocketId = (String) body.get("rocketId");
+                String dateStr = (String) body.get("departureDate");
+                Double basePrice = ((Number) body.get("basePrice")).doubleValue();
+                
+                java.time.LocalDateTime departureDate = java.time.LocalDateTime.parse(dateStr);
+                
+                Flight flight = flightService.createFlight(rocketId, departureDate, basePrice);
+                
+                String response = objectMapper.writeValueAsString(flight);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(201, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } catch (IllegalArgumentException e) {
+                String response = "{\"error\": \"" + e.getMessage() + "\"}";
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(400, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                exchange.sendResponseHeaders(500, -1);
+            }
         } else {
             exchange.sendResponseHeaders(405, -1); // Method Not Allowed
         }

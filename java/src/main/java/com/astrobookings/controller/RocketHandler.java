@@ -26,6 +26,31 @@ public class RocketHandler implements HttpHandler {
             OutputStream os = exchange.getResponseBody();
             os.write(response.getBytes());
             os.close();
+        } else if ("POST".equals(exchange.getRequestMethod())) {
+            try {
+                java.io.InputStream is = exchange.getRequestBody();
+                Rocket rocket = objectMapper.readValue(is, Rocket.class);
+                if (rocket.getId() == null) rocket.setId(java.util.UUID.randomUUID().toString());
+                
+                rocketRepository.save(rocket);
+                
+                String response = objectMapper.writeValueAsString(rocket);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(201, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } catch (IllegalArgumentException e) {
+                String response = "{\"error\": \"" + e.getMessage() + "\"}";
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(400, response.length());
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                exchange.sendResponseHeaders(500, -1);
+            }
         } else {
             exchange.sendResponseHeaders(405, -1);
         }

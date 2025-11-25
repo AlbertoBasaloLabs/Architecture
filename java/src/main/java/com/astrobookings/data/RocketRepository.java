@@ -16,6 +16,10 @@ public class RocketRepository {
     }
 
     public Rocket save(Rocket rocket) {
+        // BAD SMELL: Business logic in Repository
+        if (rocket.getCapacity() > 10) {
+            throw new IllegalArgumentException("Rocket capacity cannot exceed 10");
+        }
         db.put(rocket.getId(), rocket);
         return rocket;
     }

@@ -100,6 +100,18 @@ Estos son los puntos que los alumnos deberán detectar y corregir:
     *   Si no viene nada, error o listar todo (decisión de implementación).
 *   **Defecto**: Filtrado ineficiente en memoria (`stream().filter(...)`) dentro del servicio.
 
+### D. Crear Cohete (`POST /rockets`)
+*   **Input JSON**: `{ "name": "...", "capacity": 10, "speed": ... }`
+*   **Lógica**: Crear un nuevo cohete.
+*   **Validación**: La capacidad máxima no puede ser mayor de 10.
+*   **Defecto (Bad Smell)**: Implementar esta validación **dentro del `RocketRepository.save()`**, lanzando una excepción si la capacidad > 10. El repositorio conociendo reglas de negocio.
+
+### E. Crear Vuelo (`POST /flights`)
+*   **Input JSON**: `{ "rocketId": "...", "departureDate": "...", "basePrice": ... }`
+*   **Lógica**: Programar un nuevo vuelo.
+*   **Validación**: La fecha debe ser futura y no más allá de 1 año.
+*   **Defecto (Bad Smell)**: Implementar esta validación **en el `FlightService`** (Transaction Script), en lugar de que el objeto `Flight` o un Value Object `DepartureDate` se valide a sí mismo.
+
 ## 6. Plan de Trabajo (Paso a Paso)
 
 1.  **Inicialización**: Crear `pom.xml` con dependencia de Jackson.
