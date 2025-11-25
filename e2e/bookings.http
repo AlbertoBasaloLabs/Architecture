@@ -1,6 +1,11 @@
 # E2E tests for Booking endpoints (VS Code REST Client)
 
+###############################################################################
+# HAPPY PATH - Successful Bookings
+###############################################################################
+
 ### Create a new booking (valid payload)
+# Expected: 201 Created
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
@@ -9,7 +14,8 @@ Content-Type: application/json
   "passengerName": "John Doe"
 }
 
-### Create another booking for the same flight (valid)
+### Create another booking for the same flight
+# Expected: 201 Created
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
@@ -18,42 +24,95 @@ Content-Type: application/json
   "passengerName": "Jane Smith"
 }
 
-### Get all bookings (no filter)
-GET http://localhost:8080/bookings
-Accept: application/json
-
-### Get bookings filtered by flightId
-GET http://localhost:8080/bookings?flightId=f1
-Accept: application/json
-
-### Get bookings filtered by passengerName
-GET http://localhost:8080/bookings?passengerName=John%20Doe
-Accept: application/json
-
-### Get bookings filtered by both flightId and passengerName
-GET http://localhost:8080/bookings?flightId=f1&passengerName=John%20Doe
-Accept: application/json
-
-
-
-### Create a booking with missing flightId (error case)
+### Create third booking (testing state transition to CONFIRMED at 5 bookings)
+# Expected: 201 Created
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
 {
+  "flightId": "f1",
   "passengerName": "Alice Johnson"
 }
 
-### Create a booking with invalid flightId (error case)
+### Create fourth booking
+# Expected: 201 Created
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": "Bob Brown"
+}
+
+### Create fifth booking (should trigger SCHEDULED -> CONFIRMED transition)
+# Expected: 201 Created, flight status should change to CONFIRMED
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": "Charlie Davis"
+}
+
+###############################################################################
+# QUERY TESTS - Filtering Bookings
+###############################################################################
+
+### Get all bookings (no filter)
+# Expected: 200 OK
+GET http://localhost:8080/bookings
+Accept: application/json
+
+### Get bookings filtered by flightId
+# Expected: 200 OK, list of bookings for f1
+GET http://localhost:8080/bookings?flightId=f1
+Accept: application/json
+
+### Get bookings filtered by passengerName
+# Expected: 200 OK, list with one booking
+GET http://localhost:8080/bookings?passengerName=John%20Doe
+Accept: application/json
+
+### Get bookings filtered by both flightId and passengerName
+# Expected: 200 OK, list with one booking matching both criteria
+GET http://localhost:8080/bookings?flightId=f1&passengerName=John%20Doe
+Accept: application/json
+
+### Get bookings for non-existent flight
+# Expected: 200 OK, empty list
+GET http://localhost:8080/bookings?flightId=non-existent
+Accept: application/json
+
+### Get bookings for non-existent passenger
+# Expected: 200 OK, empty list
+GET http://localhost:8080/bookings?passengerName=Ghost%20Passenger
+Accept: application/json
+
+###############################################################################
+# VALIDATION ERRORS - Missing/Invalid Fields
+###############################################################################
+
+### Create a booking with missing flightId
+# Expected: 400 Bad Request
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "passengerName": "Missing Flight"
+}
+
+### Create a booking with invalid flightId (non-existent)
+# Expected: 400 Bad Request - "Flight not found"
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
 {
   "flightId": "invalid-flight-id",
-  "passengerName": "Bob Brown"
+  "passengerName": "Invalid Flight"
 }
 
-### Create a booking with missing passengerName (error case)
+### Create a booking with missing passengerName
+# Expected: 400 Bad Request
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
@@ -61,7 +120,8 @@ Content-Type: application/json
   "flightId": "f1"
 }
 
-### Create a booking with empty passengerName (error case)
+### Create a booking with empty passengerName
+# Expected: 400 Bad Request
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
@@ -70,23 +130,113 @@ Content-Type: application/json
   "passengerName": ""
 }
 
-### Create bookings until flight is full (capacity test)
-# Note: Default rocket "r1" has capacity 10
-# Create multiple bookings to test capacity validation
+###############################################################################
+# BUSINESS RULE TESTS - Capacity and State
+###############################################################################
+
+### Create bookings to fill remaining capacity (6-10)
+# Note: Default rocket "r1" has capacity 10, we already have 5 bookings
+# Expected: 201 Created for each
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
 {
   "flightId": "f1",
-  "passengerName": "Passenger 3"
+  "passengerName": "Passenger 6"
 }
 
-### Create one more booking after capacity is reached (error case)
-# This should fail if flight is already full
+###
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": "Passenger 7"
+}
+
+###
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": "Passenger 8"
+}
+
+###
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": "Passenger 9"
+}
+
+### Create 10th booking (should trigger CONFIRMED -> SOLD_OUT transition)
+# Expected: 201 Created, flight status should change to SOLD_OUT
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": "Passenger 10"
+}
+
+### Attempt to create booking on SOLD_OUT flight
+# Expected: 400 Bad Request - "Flight is full" or "Cannot book this flight"
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
 {
   "flightId": "f1",
   "passengerName": "Passenger Overflow"
+}
+
+###############################################################################
+# DISCOUNT POLICY TESTS
+# Note: These require specific flight configurations with different dates
+###############################################################################
+
+### Booking with >6 months advance (10% discount)
+# Expected: 201 Created, finalPrice = basePrice * 0.9
+# Note: Requires a flight with departureDate > 180 days from now
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f_far_future",
+  "passengerName": "Early Bird"
+}
+
+### Booking between 1 month and 1 week before departure (20% discount)
+# Expected: 201 Created, finalPrice = basePrice * 0.8
+# Note: Requires a flight with departureDate between 7-30 days from now
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f_near_future",
+  "passengerName": "Last Minute"
+}
+
+### Booking when only 1 seat remains (no discount)
+# Expected: 201 Created, finalPrice = basePrice (no discount)
+# Note: Requires a flight with 9 existing bookings (capacity 10)
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f_one_seat_left",
+  "passengerName": "Last Seat"
+}
+
+### Booking when 1 seat left to reach minPassengers (30% discount)
+# Expected: 201 Created, finalPrice = basePrice * 0.7
+# Note: Requires a flight with exactly 4 bookings (minPassengers = 5)
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f_almost_confirmed",
+  "passengerName": "Confirming Passenger"
 }

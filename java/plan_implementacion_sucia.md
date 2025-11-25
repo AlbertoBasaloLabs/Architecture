@@ -30,14 +30,18 @@ Clases simples con Getters y Setters. Sin lógica de negocio.
     *   `id` (String/Long)
     *   `name` (String)
     *   `capacity` (int) - Capacidad total de pasajeros.
-    *   `speed` (double) - Para cálculos cosméticos.
+    *   `speed` (double) - Campo cosmético sin uso funcional (dead code intencional).
 *   **`Flight`**:
     *   `id` (String)
     *   `rocketId` (String) - Referencia por ID (Bad smell: no referencia al objeto).
     *   `departureDate` (LocalDateTime)
     *   `basePrice` (double)
-    *   `minPassengers` (int) - Mínimo de pasajeros para confirmar el vuelo.
-    *   `status` (Enum: SCHEDULED, CONFIRMED, SOLD_OUT)
+    *   `minPassengers` (int) - Mínimo de pasajeros para confirmar el vuelo (hardcoded a 5 en creación).
+    *   `status` (Enum: SCHEDULED, CONFIRMED, SOLD_OUT, CANCELLED)
+        *   `SCHEDULED`: Estado inicial al crear el vuelo.
+        *   `CONFIRMED`: Se cambia automáticamente cuando se alcanza `minPassengers` reservas.
+        *   `SOLD_OUT`: Se cambia automáticamente cuando se alcanza la capacidad máxima del cohete.
+        *   `CANCELLED`: Se cambia automáticamente si a falta de 1 semana no se alcanza el mínimo de pasajeros.
 *   **`Booking`**:
     *   `id` (String)
     *   `flightId` (String)
@@ -58,6 +62,10 @@ Estos son los puntos que los alumnos deberán detectar y corregir:
 4.  **Modelo Anémico**:
     *   Las entidades no validan su estado (se puede crear un vuelo con precio negativo).
     *   Toda la lógica está en los Servicios ("Transaction Script").
+    *   La lógica de descuentos compleja (con múltiples condiciones) está dispersa en el servicio en lugar de estar encapsulada en un objeto de dominio.
+5.  **Lógica de Estado Compleja en Servicio**:
+    *   El cambio de estados del vuelo (CONFIRMED, SOLD_OUT) se hace en el servicio de reservas, mezclando responsabilidades.
+    *   No hay un proceso automático para cambiar vuelos a CANCELLED (se debería implementar con un job/scheduler, pero se omite intencionalmente).
 
 ## 5. Funcionalidades a Implementar
 
@@ -75,42 +83,60 @@ Estos son los puntos que los alumnos deberán detectar y corregir:
 *   **Input JSON**: `{ "flightId": "...", "passengerName": "..." }` (no debe incluir campo `id`). El campo `flightId` debe referenciar un vuelo existente.
 *   **Flujo en `BookingService`**:
     1.  Obtener `Flight` por ID (si no existe, lanzar RuntimeException).
-    2.  Obtener `Rocket` usando `flight.getRocketId()`.
-    3.  **Lógica de Capacidad**:
+    2.  **Validar estado del vuelo**: Si el estado es `SOLD_OUT` o `CANCELLED`, lanzar error "Cannot book this flight".
+    3.  Obtener `Rocket` usando `flight.getRocketId()`.
+    4.  **Lógica de Capacidad**:
         *   Obtener todas las `Booking` del sistema.
         *   Filtrar las que coinciden con este `flightId`.
         *   Si `count >= rocket.capacity`, lanzar error "Flight Full".
-    4.  **Lógica de Precio**:
+    5.  **Lógica de Precio con Orden de Precedencia** (Bad Smell: Lógica compleja en servicio):
         *   Precio base = `flight.basePrice`.
-        *   Si `bookingDate` es > 30 días antes de `departureDate`, aplicar 10% descuento.
-    5.  Crear objeto `Booking`.
-    6.  Guardar en `BookingRepository`.
-    7.  **Efecto Colateral (Side Effect)**:
+        *   Calcular plazas disponibles: `availableSeats = rocket.capacity - currentBookings`
+        *   Calcular plazas faltantes para mínimo: `seatsToMin = flight.minPassengers - currentBookings`
+        *   Calcular días hasta salida: `daysUntilDeparture = ChronoUnit.DAYS.between(now, departureDate)`
+        *   **Aplicar el primer descuento que coincida**:
+            1.  Si `availableSeats == 1` → Sin descuento (precio = basePrice)
+            2.  Si `seatsToMin == 1` → 30% descuento (precio = basePrice * 0.7)
+            3.  Si `daysUntilDeparture > 180` (6 meses) → 10% descuento (precio = basePrice * 0.9)
+            4.  Si `daysUntilDeparture >= 7 && daysUntilDeparture <= 30` → 20% descuento (precio = basePrice * 0.8)
+            5.  En cualquier otro caso → Sin descuento (precio = basePrice)
+    6.  Crear objeto `Booking`.
+    7.  Guardar en `BookingRepository`.
+    8.  **Efectos Colaterales (Side Effects)**:
         *   Recuperar de nuevo todas las reservas del vuelo.
         *   Si `count >= flight.minPassengers` y el estado es `SCHEDULED`, cambiar estado a `CONFIRMED`.
+        *   Si `count >= rocket.capacity`, cambiar estado a `SOLD_OUT`.
         *   Guardar `Flight` actualizado (si el repositorio no lo hace por referencia).
 
 ### C. Consultar Reservas (`GET /bookings`)
 *   **Filtros (Query Params)**:
     *   `?flightId=...`: Ver todas las reservas de un vuelo.
     *   `?passengerName=...`: Ver todas las reservas de un pasajero.
+    *   Ambos filtros pueden combinarse.
 *   **Lógica**:
     *   Si viene `flightId`, filtrar por vuelo.
     *   Si viene `passengerName`, filtrar por nombre.
-    *   Si no viene nada, error o listar todo (decisión de implementación).
-*   **Defecto**: Filtrado ineficiente en memoria (`stream().filter(...)`) dentro del servicio.
+    *   Si no viene nada, listar todas las reservas.
+*   **Defecto (Bad Smell)**: El filtrado se hace **en el Controlador** (`BookingHandler`), no en el servicio. El controlador obtiene todas las reservas del servicio y luego filtra con `stream().filter(...)`. Esto viola la separación de responsabilidades: el controlador tiene lógica de negocio.
 
 ### D. Crear Cohete (`POST /rockets`)
 *   **Input JSON**: `{ "name": "...", "capacity": 10, "speed": ... }` (no debe incluir campo `id`).
 *   **Lógica**: Crear un nuevo cohete.
-*   **Validación**: La capacidad máxima no puede ser mayor de 10.
-*   **Defecto (Bad Smell)**: Implementar esta validación **dentro del `RocketRepository.save()`**, lanzando una excepción si la capacidad > 10. El repositorio conociendo reglas de negocio.
+*   **Validaciones**:
+    *   El nombre no puede estar vacío.
+    *   La capacidad máxima no puede ser mayor de 10.
+*   **Defectos (Bad Smells)**:
+    1.  **No existe `RocketService`**: El `RocketHandler` accede directamente al `RocketRepository`, saltándose la capa de servicio.
+    2.  **Validaciones en el Repositorio**: Implementar las validaciones de nombre y capacidad **dentro del `RocketRepository.save()`**, lanzando excepciones. El repositorio conoce reglas de negocio.
 
 ### E. Crear Vuelo (`POST /flights`)
 *   **Input JSON**: `{ "rocketId": "...", "departureDate": "...", "basePrice": ... }` (no debe incluir campo `id`). El campo `rocketId` debe referenciar un cohete existente.
-*   **Lógica**: Programar un nuevo vuelo.
-*   **Validación**: La fecha debe ser futura y no más allá de 1 año. El precio base debe existir y ser positivo.
-*   **Defecto (Bad Smell)**: Implementar esta validación **en el `FlightService`** (Transaction Script), en lugar de que el objeto `Flight` o un Value Object `DepartureDate` se valide a sí mismo.
+*   **Lógica**: Programar un nuevo vuelo con estado inicial `SCHEDULED` y `minPassengers` hardcoded a 5.
+*   **Validaciones**:
+    *   El `rocketId` debe existir en la base de datos.
+    *   La fecha debe ser futura y no más allá de 1 año.
+    *   El precio base debe existir (no null) y ser positivo (> 0).
+*   **Defecto (Bad Smell)**: Implementar todas estas validaciones **en el `FlightService`** (Transaction Script), en lugar de que el objeto `Flight` o un Value Object `DepartureDate` se valide a sí mismo. El servicio tiene toda la lógica de validación.
 
 ## 6. Plan de Trabajo (Paso a Paso)
 
