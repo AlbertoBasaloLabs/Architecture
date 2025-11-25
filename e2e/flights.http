@@ -27,6 +27,16 @@ Content-Type: application/json
   "basePrice": 1500.0
 }
 
+### Create a flight with invalid rocketId (error case)
+POST http://localhost:8080/flights
+Content-Type: application/json
+
+{
+  "rocketId": "invalid-rocket-id",
+  "departureDate": "2025-12-01T10:00:00",
+  "basePrice": 1500.0
+}
+
 ### Create a flight with invalid date format (error case)
 POST http://localhost:8080/flights
 Content-Type: application/json
@@ -47,15 +57,15 @@ Content-Type: application/json
   "basePrice": -100.0
 }
 
-### Create a flight with zero basePrice (error case)
+### Create a flight with missing basePrice (error case)
 POST http://localhost:8080/flights
 Content-Type: application/json
 
 {
   "rocketId": "r1",
-  "departureDate": "2025-12-01T10:00:00",
-  "basePrice": 0.0
+  "departureDate": "2025-12-01T10:00:00"
 }
+
 
 ### Create a flight with departureDate in the past (error case)
 POST http://localhost:8080/flights
@@ -77,11 +87,12 @@ Content-Type: application/json
   "basePrice": 1500.0
 }
 
-### Create a flight with missing basePrice (error case)
+### Create a flight with missing departureDate (error case)
 POST http://localhost:8080/flights
 Content-Type: application/json
 
 {
   "rocketId": "r1",
-  "departureDate": "2025-12-01T10:00:00"
+  "basePrice": 1500.0
 }
+

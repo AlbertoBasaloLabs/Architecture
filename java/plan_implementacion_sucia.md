@@ -72,7 +72,7 @@ Estos son los puntos que los alumnos deberán detectar y corregir:
 *   **Defecto**: Exponer directamente la entidad de base de datos.
 
 ### B. Crear Reserva (`POST /bookings`)
-*   **Input JSON**: `{ "flightId": "...", "passengerName": "..." }`
+*   **Input JSON**: `{ "flightId": "...", "passengerName": "..." }` (no debe incluir campo `id`). El campo `flightId` debe referenciar un vuelo existente.
 *   **Flujo en `BookingService`**:
     1.  Obtener `Flight` por ID (si no existe, lanzar RuntimeException).
     2.  Obtener `Rocket` usando `flight.getRocketId()`.
@@ -101,15 +101,15 @@ Estos son los puntos que los alumnos deberán detectar y corregir:
 *   **Defecto**: Filtrado ineficiente en memoria (`stream().filter(...)`) dentro del servicio.
 
 ### D. Crear Cohete (`POST /rockets`)
-*   **Input JSON**: `{ "name": "...", "capacity": 10, "speed": ... }`
+*   **Input JSON**: `{ "name": "...", "capacity": 10, "speed": ... }` (no debe incluir campo `id`).
 *   **Lógica**: Crear un nuevo cohete.
 *   **Validación**: La capacidad máxima no puede ser mayor de 10.
 *   **Defecto (Bad Smell)**: Implementar esta validación **dentro del `RocketRepository.save()`**, lanzando una excepción si la capacidad > 10. El repositorio conociendo reglas de negocio.
 
 ### E. Crear Vuelo (`POST /flights`)
-*   **Input JSON**: `{ "rocketId": "...", "departureDate": "...", "basePrice": ... }`
+*   **Input JSON**: `{ "rocketId": "...", "departureDate": "...", "basePrice": ... }` (no debe incluir campo `id`). El campo `rocketId` debe referenciar un cohete existente.
 *   **Lógica**: Programar un nuevo vuelo.
-*   **Validación**: La fecha debe ser futura y no más allá de 1 año.
+*   **Validación**: La fecha debe ser futura y no más allá de 1 año. El precio base debe existir y ser positivo.
 *   **Defecto (Bad Smell)**: Implementar esta validación **en el `FlightService`** (Transaction Script), en lugar de que el objeto `Flight` o un Value Object `DepartureDate` se valide a sí mismo.
 
 ## 6. Plan de Trabajo (Paso a Paso)

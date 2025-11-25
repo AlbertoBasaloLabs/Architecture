@@ -25,16 +25,6 @@ Content-Type: application/json
   "capacity": 3
 }
 
-### Create a rocket with duplicate ID (error case) - using explicit ID
-POST http://localhost:8080/rockets
-Content-Type: application/json
-
-{
-  "id": "r1",
-  "name": "Duplicate Rocket",
-  "capacity": 2
-}
-
 ### Create a rocket with unsoported capacity (error case)
 POST http://localhost:8080/rockets
 Content-Type: application/json

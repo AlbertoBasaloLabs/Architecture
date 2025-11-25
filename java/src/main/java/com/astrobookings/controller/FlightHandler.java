@@ -52,8 +52,20 @@ public class FlightHandler implements HttpHandler {
                 if (rocketId == null || rocketId.trim().isEmpty()) {
                     throw new IllegalArgumentException("Rocket id must be provided");
                 }
+                
+                // Validate departureDate exists
                 String dateStr = (String) body.get("departureDate");
-                Double basePrice = ((Number) body.get("basePrice")).doubleValue();
+                if (dateStr == null || dateStr.trim().isEmpty()) {
+                    throw new IllegalArgumentException("Departure date must be provided");
+                }
+                
+                // Validate basePrice exists
+                Object basePriceObj = body.get("basePrice");
+                if (basePriceObj == null) {
+                    throw new IllegalArgumentException("Base price must be provided");
+                }
+                Double basePrice = ((Number) basePriceObj).doubleValue();
+                
                 java.time.LocalDateTime departureDate;
                 try {
                     departureDate = java.time.LocalDateTime.parse(dateStr);
