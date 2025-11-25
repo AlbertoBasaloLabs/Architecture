@@ -24,7 +24,45 @@ public class BookingHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        if ("POST".equals(exchange.getRequestMethod())) {
+        if ("GET".equals(exchange.getRequestMethod())) {
+            // BAD SMELL: Logic inside Controller (Smart Controller)
+            // BAD SMELL: Inconsistent query parsing (using split vs regex or library)
+            String query = exchange.getRequestURI().getQuery();
+            String flightId = null;
+            String passengerName = null;
+
+            if (query != null) {
+                String[] pairs = query.split("&");
+                for (String pair : pairs) {
+                    String[] kv = pair.split("=");
+                    if (kv.length == 2) {
+                        if ("flightId".equals(kv[0])) flightId = kv[1];
+                        else if ("passengerName".equals(kv[0])) passengerName = kv[1];
+                    }
+                }
+            }
+
+            // BAD SMELL: Controller accessing repository directly to filter!
+            // We need to access the repository. Since BookingService has it private, 
+            // we'll instantiate a new Repository here (even worse!).
+            // Ideally we should ask the service, but we want to show inconsistency.
+            // Let's assume we add a method to Service to "findAll" and filter here.
+            
+            java.util.List<Booking> bookings = bookingService.findAllBookings();
+            
+            final String fId = flightId;
+            final String pName = passengerName;
+
+            java.util.List<Booking> filtered = bookings.stream()
+                .filter(b -> fId == null || b.getFlightId().equals(fId))
+                .filter(b -> pName == null || b.getPassengerName().equals(pName))
+                .collect(java.util.stream.Collectors.toList());
+
+            String response = objectMapper.writeValueAsString(filtered);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            sendResponse(exchange, 200, response);
+
+        } else if ("POST".equals(exchange.getRequestMethod())) {
             try {
                 InputStream is = exchange.getRequestBody();
                 Map<String, String> body = objectMapper.readValue(is, Map.class);

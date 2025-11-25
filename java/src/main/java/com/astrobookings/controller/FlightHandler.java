@@ -24,7 +24,17 @@ public class FlightHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if ("GET".equals(exchange.getRequestMethod())) {
-            List<Flight> flights = flightService.getAvailableFlights();
+            String query = exchange.getRequestURI().getQuery();
+            String status = null;
+            // Manual parsing of query params (Inconsistent with other handlers if we had a library)
+            if (query != null && query.contains("status=")) {
+                String[] parts = query.split("status=");
+                if (parts.length > 1) {
+                    status = parts[1].split("&")[0];
+                }
+            }
+
+            List<Flight> flights = flightService.getAvailableFlights(status);
             String response = objectMapper.writeValueAsString(flights);
 
             exchange.getResponseHeaders().set("Content-Type", "application/json");

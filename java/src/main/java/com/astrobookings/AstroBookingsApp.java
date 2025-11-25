@@ -14,6 +14,7 @@ public class AstroBookingsApp {
 
         server.createContext("/flights", new FlightHandler());
         server.createContext("/bookings", new BookingHandler());
+        server.createContext("/rockets", new RocketHandler());
 
         server.setExecutor(null); // creates a default executor
         server.start();

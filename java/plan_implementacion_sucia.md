@@ -63,7 +63,13 @@ Estos son los puntos que los alumnos deberán detectar y corregir:
 
 ### A. Listar Vuelos Disponibles (`GET /flights`)
 *   **Lógica**: Retorna todos los vuelos futuros.
-*   **Defecto**: El filtro de fecha se hace en el Controlador o Servicio, no en el Repositorio.
+*   **Filtros (Query Params)**:
+    *   `?status=SCHEDULED|CONFIRMED` (Opcional): Filtrar por estado.
+*   **Defecto**: El filtro de fecha y estado se hace en el Controlador o Servicio, no en el Repositorio.
+
+### B. Listar Cohetes (`GET /rockets`)
+*   **Lógica**: Retorna todos los cohetes del sistema.
+*   **Defecto**: Exponer directamente la entidad de base de datos.
 
 ### B. Crear Reserva (`POST /bookings`)
 *   **Input JSON**: `{ "flightId": "...", "passengerName": "..." }`
@@ -83,6 +89,16 @@ Estos son los puntos que los alumnos deberán detectar y corregir:
         *   Recuperar de nuevo todas las reservas del vuelo.
         *   Si `count >= flight.minPassengers` y el estado es `SCHEDULED`, cambiar estado a `CONFIRMED`.
         *   Guardar `Flight` actualizado (si el repositorio no lo hace por referencia).
+
+### C. Consultar Reservas (`GET /bookings`)
+*   **Filtros (Query Params)**:
+    *   `?flightId=...`: Ver todas las reservas de un vuelo.
+    *   `?passengerName=...`: Ver todas las reservas de un pasajero.
+*   **Lógica**:
+    *   Si viene `flightId`, filtrar por vuelo.
+    *   Si viene `passengerName`, filtrar por nombre.
+    *   Si no viene nada, error o listar todo (decisión de implementación).
+*   **Defecto**: Filtrado ineficiente en memoria (`stream().filter(...)`) dentro del servicio.
 
 ## 6. Plan de Trabajo (Paso a Paso)
 

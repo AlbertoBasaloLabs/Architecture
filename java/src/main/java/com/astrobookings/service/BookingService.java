@@ -63,4 +63,8 @@ public class BookingService {
 
         return booking;
     }
+
+    public List<Booking> findAllBookings() {
+        return bookingRepository.findAll();
+    }
 }

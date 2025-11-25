@@ -12,9 +12,17 @@ public class FlightService {
     private FlightRepository flightRepository = new FlightRepository();
 
     public List<Flight> getAvailableFlights() {
+        return getAvailableFlights(null);
+    }
+
+    public List<Flight> getAvailableFlights(String statusStr) {
         // BAD SMELL: Fetching all and filtering in memory
         return flightRepository.findAll().stream()
                 .filter(f -> f.getDepartureDate().isAfter(LocalDateTime.now()))
+                .filter(f -> {
+                    if (statusStr == null) return true;
+                    return f.getStatus().name().equals(statusStr);
+                })
                 .collect(Collectors.toList());
     }
 }
