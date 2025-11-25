@@ -1,0 +1,87 @@
+# E2E tests for Flight endpoints (VS Code REST Client)
+
+### Get all flights (no filter)
+GET http://localhost:8080/flights
+Accept: application/json
+
+### Get flights filtered by status (e.g., "SCHEDULED")
+GET http://localhost:8080/flights?status=SCHEDULED
+Accept: application/json
+
+### Create a new flight (valid payload)
+POST http://localhost:8080/flights
+Content-Type: application/json
+
+{
+  "rocketId": "r1",
+  "departureDate": "2025-12-01T10:00:00",
+  "basePrice": 1500.0
+}
+
+### Create a flight with missing rocketId (error case)
+POST http://localhost:8080/flights
+Content-Type: application/json
+
+{
+  "departureDate": "2025-12-01T10:00:00",
+  "basePrice": 1500.0
+}
+
+### Create a flight with invalid date format (error case)
+POST http://localhost:8080/flights
+Content-Type: application/json
+
+{
+  "rocketId": "r1",
+  "departureDate": "invalid-date",
+  "basePrice": 1500.0
+}
+
+### Create a flight with negative basePrice (error case)
+POST http://localhost:8080/flights
+Content-Type: application/json
+
+{
+  "rocketId": "r1",
+  "departureDate": "2025-12-01T10:00:00",
+  "basePrice": -100.0
+}
+
+### Create a flight with zero basePrice (error case)
+POST http://localhost:8080/flights
+Content-Type: application/json
+
+{
+  "rocketId": "r1",
+  "departureDate": "2025-12-01T10:00:00",
+  "basePrice": 0.0
+}
+
+### Create a flight with departureDate in the past (error case)
+POST http://localhost:8080/flights
+Content-Type: application/json
+
+{
+  "rocketId": "r1",
+  "departureDate": "2020-01-01T10:00:00",
+  "basePrice": 1500.0
+}
+
+### Create a flight with departureDate more than 1 year ahead (error case)
+POST http://localhost:8080/flights
+Content-Type: application/json
+
+{
+  "rocketId": "r1",
+  "departureDate": "2027-12-01T10:00:00",
+  "basePrice": 1500.0
+}
+
+### Create a flight with missing basePrice (error case)
+POST http://localhost:8080/flights
+Content-Type: application/json
+
+{
+  "rocketId": "r1",
+  "departureDate": "2025-12-01T10:00:00"
+}

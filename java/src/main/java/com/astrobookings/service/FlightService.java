@@ -20,24 +20,6 @@ public class FlightService {
         return flightRepository.findAll().stream()
                 .filter(f -> f.getDepartureDate().isAfter(LocalDateTime.now()))
                 .filter(f -> {
-                    if (statusStr == null) return true;
-                    return f.getStatus().name().equals(statusStr);
-                })
-                .collect(Collectors.toList());
-    }
-
-    public Flight createFlight(String rocketId, LocalDateTime departureDate, double basePrice) {
-        // BAD SMELL: Validation in Service (Transaction Script)
-        if (departureDate.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Departure date must be in the future");
-        }
-        if (departureDate.isAfter(LocalDateTime.now().plusYears(1))) {
-            throw new IllegalArgumentException("Departure date cannot be more than 1 year in the future");
-        }
-
-        Flight flight = new Flight(
-            java.util.UUID.randomUUID().toString(),
-            rocketId,
             departureDate,
             basePrice,
             0, 

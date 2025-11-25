@@ -49,10 +49,17 @@ public class FlightHandler implements HttpHandler {
                 java.util.Map<String, Object> body = objectMapper.readValue(is, java.util.Map.class);
                 
                 String rocketId = (String) body.get("rocketId");
+                if (rocketId == null || rocketId.trim().isEmpty()) {
+                    throw new IllegalArgumentException("Rocket id must be provided");
+                }
                 String dateStr = (String) body.get("departureDate");
                 Double basePrice = ((Number) body.get("basePrice")).doubleValue();
-                
-                java.time.LocalDateTime departureDate = java.time.LocalDateTime.parse(dateStr);
+                java.time.LocalDateTime departureDate;
+                try {
+                    departureDate = java.time.LocalDateTime.parse(dateStr);
+                } catch (java.time.format.DateTimeParseException e) {
+                    throw new IllegalArgumentException("Invalid departure date format");
+                }
                 
                 Flight flight = flightService.createFlight(rocketId, departureDate, basePrice);
                 
