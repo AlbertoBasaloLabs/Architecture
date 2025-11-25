@@ -71,6 +71,11 @@ public class BookingHandler implements HttpHandler {
                 String passengerName = body.get("passengerName");
 
                 // BAD SMELL: Validation in controller
+                if (flightId == null || flightId.isEmpty()) {
+                    sendResponse(exchange, 400, "Flight id is required");
+                    return;
+                }
+                
                 if (passengerName == null || passengerName.isEmpty()) {
                     sendResponse(exchange, 400, "Passenger name is required");
                     return;
@@ -82,9 +87,23 @@ public class BookingHandler implements HttpHandler {
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 sendResponse(exchange, 200, response);
 
+            } catch (IllegalArgumentException e) {
+                // BAD SMELL: Catching domain exceptions in controller
+                String errorJson = "{\"error\": \"" + e.getMessage() + "\"}";
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                sendResponse(exchange, 400, errorJson);
+            } catch (RuntimeException e) {
+                // BAD SMELL: Using RuntimeException for business logic errors
+                // Catch specific business errors (Flight not found, Flight is full)
+                e.printStackTrace();
+                String errorJson = "{\"error\": \"" + e.getMessage() + "\"}";
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                sendResponse(exchange, 400, errorJson);
             } catch (Exception e) {
                 e.printStackTrace();
-                sendResponse(exchange, 500, "Error: " + e.getMessage());
+                String errorJson = "{\"error\": \"Internal server error\"}";
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                sendResponse(exchange, 500, errorJson);
             }
         } else {
             exchange.sendResponseHeaders(405, -1);

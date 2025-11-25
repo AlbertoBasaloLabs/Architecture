@@ -1,0 +1,92 @@
+# E2E tests for Booking endpoints (VS Code REST Client)
+
+### Create a new booking (valid payload)
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": "John Doe"
+}
+
+### Create another booking for the same flight (valid)
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": "Jane Smith"
+}
+
+### Get all bookings (no filter)
+GET http://localhost:8080/bookings
+Accept: application/json
+
+### Get bookings filtered by flightId
+GET http://localhost:8080/bookings?flightId=f1
+Accept: application/json
+
+### Get bookings filtered by passengerName
+GET http://localhost:8080/bookings?passengerName=John%20Doe
+Accept: application/json
+
+### Get bookings filtered by both flightId and passengerName
+GET http://localhost:8080/bookings?flightId=f1&passengerName=John%20Doe
+Accept: application/json
+
+
+
+### Create a booking with missing flightId (error case)
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "passengerName": "Alice Johnson"
+}
+
+### Create a booking with invalid flightId (error case)
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "invalid-flight-id",
+  "passengerName": "Bob Brown"
+}
+
+### Create a booking with missing passengerName (error case)
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1"
+}
+
+### Create a booking with empty passengerName (error case)
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": ""
+}
+
+### Create bookings until flight is full (capacity test)
+# Note: Default rocket "r1" has capacity 10
+# Create multiple bookings to test capacity validation
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": "Passenger 3"
+}
+
+### Create one more booking after capacity is reached (error case)
+# This should fail if flight is already full
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "f1",
+  "passengerName": "Passenger Overflow"
+}
