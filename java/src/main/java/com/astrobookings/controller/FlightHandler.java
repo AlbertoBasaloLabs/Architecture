@@ -55,7 +55,12 @@ public class FlightHandler extends BaseHandler implements HttpHandler {
             
             sendJsonResponse(exchange, 201, flight);
         } catch (IllegalArgumentException e) {
-            handleError(exchange, 400, e.getMessage());
+            // Differentiate between not-found (404) and validation errors (400)
+            if (e.getMessage() != null && e.getMessage().contains("does not exist")) {
+                handleError(exchange, 404, e.getMessage());
+            } else {
+                handleError(exchange, 400, e.getMessage());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             exchange.sendResponseHeaders(500, -1);

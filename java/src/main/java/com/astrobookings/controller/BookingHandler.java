@@ -66,7 +66,12 @@ public class BookingHandler extends BaseHandler implements HttpHandler {
             handleError(exchange, 400, e.getMessage());
         } catch (RuntimeException e) {
             // BAD SMELL: Using RuntimeException for business logic errors
-            handleError(exchange, 400, e.getMessage());
+            // Differentiate between not-found (404) and other errors (400)
+            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("not found")) {
+                handleError(exchange, 404, e.getMessage());
+            } else {
+                handleError(exchange, 400, e.getMessage());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             handleError(exchange, 500, "Internal server error");

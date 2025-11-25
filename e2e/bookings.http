@@ -102,7 +102,7 @@ Content-Type: application/json
 }
 
 ### Create a booking with invalid flightId (non-existent)
-# Expected: 400 Bad Request - "Flight not found"
+# Expected: 404 Not Found - "Flight not found"
 POST http://localhost:8080/bookings
 Content-Type: application/json
 

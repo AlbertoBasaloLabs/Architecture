@@ -121,7 +121,7 @@ Content-Type: application/json
 ###############################################################################
 
 ### Create a flight with invalid rocketId (non-existent)
-# Expected: 400 Bad Request - "Rocket with id ... does not exist"
+# Expected: 404 Not Found - "Rocket with id ... does not exist"
 POST http://localhost:8080/flights
 Content-Type: application/json
 
