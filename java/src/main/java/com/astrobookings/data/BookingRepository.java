@@ -1,11 +1,13 @@
 package com.astrobookings.data;
 
 import com.astrobookings.model.Booking;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 public class BookingRepository {
     private static final Map<String, Booking> db = new HashMap<>();
@@ -13,7 +15,7 @@ public class BookingRepository {
     public Booking save(Booking booking) {
         // Assign a new ID if missing
         if (booking.getId() == null) {
-            booking.setId(java.util.UUID.randomUUID().toString());
+            booking.setId(UUID.randomUUID().toString());
         }
         db.put(booking.getId(), booking);
         return booking;

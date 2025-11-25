@@ -1,6 +1,7 @@
 package com.astrobookings.data;
 
 import com.astrobookings.model.Rocket;
+import java.util.UUID;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class RocketRepository {
         }
         // Assign a new ID if missing
         if (rocket.getId() == null) {
-            rocket.setId(java.util.UUID.randomUUID().toString());
+            rocket.setId(UUID.randomUUID().toString());
         }
         db.put(rocket.getId(), rocket);
         return rocket;

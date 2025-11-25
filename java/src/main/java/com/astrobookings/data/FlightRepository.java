@@ -2,6 +2,7 @@ package com.astrobookings.data;
 
 import com.astrobookings.model.Flight;
 import com.astrobookings.model.FlightStatus;
+import java.util.UUID;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +23,7 @@ public class FlightRepository {
     public Flight save(Flight flight) {
         // Assign a new ID if missing
         if (flight.getId() == null) {
-            flight.setId(java.util.UUID.randomUUID().toString());
+            flight.setId(UUID.randomUUID().toString());
         }
         db.put(flight.getId(), flight);
         return flight;
