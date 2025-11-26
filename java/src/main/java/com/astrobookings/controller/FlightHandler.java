@@ -45,17 +45,12 @@ public class FlightHandler extends BaseHandler implements HttpHandler {
             String rocketId = (String) body.get("rocketId");
             String dateStr = (String) body.get("departureDate");
             Object basePriceObj = body.get("basePrice");
-            
             validateFlightInput(rocketId, dateStr, basePriceObj);
-            
-            double basePrice = ((Number) basePriceObj).doubleValue();
-            LocalDateTime departureDate = parseDate(dateStr);
-            
+            double basePrice = parseNumber(basePriceObj, "Invalid base price format");
+            LocalDateTime departureDate = parseDate(dateStr, "Invalid departure date format");
             Flight flight = flightService.createFlight(rocketId, departureDate, basePrice);
-            
             sendJsonResponse(exchange, 201, flight);
         } catch (IllegalArgumentException e) {
-            // Differentiate between not-found (404) and validation errors (400)
             if (e.getMessage() != null && e.getMessage().contains("does not exist")) {
                 handleError(exchange, 404, e.getMessage());
             } else {
@@ -66,9 +61,39 @@ public class FlightHandler extends BaseHandler implements HttpHandler {
             exchange.sendResponseHeaders(500, -1);
         }
     }
+    
+
+    private void validateFlightInput(String rocketId, String dateStr, Object basePriceObj) {
+        if (rocketId == null || rocketId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Rocket id must be provided");
+        }
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("Departure date must be provided");
+        }
+        if (basePriceObj == null || !(basePriceObj instanceof Number)) {
+            throw new IllegalArgumentException("Base price must be provided");
+        }
+    }
+
+    private double parseNumber(Object obj, String errorMessage) {
+        if (obj == null) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+        if (!(obj instanceof Number)) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+        return ((Number) obj).doubleValue();
+    }
+
+    private LocalDateTime parseDate(String dateStr, String errorMessage) {
+        try {
+            return LocalDateTime.parse(dateStr);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
 
     private String parseStatusParam(String query) {
-        // Manual parsing of query params (Inconsistent with other handlers if we had a library)
         if (query != null && query.contains("status=")) {
             String[] parts = query.split("status=");
             if (parts.length > 1) {
@@ -76,27 +101,5 @@ public class FlightHandler extends BaseHandler implements HttpHandler {
             }
         }
         return null;
-    }
-
-    private void validateFlightInput(String rocketId, String dateStr, Object basePriceObj) {
-        if (rocketId == null || rocketId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Rocket id must be provided");
-        }
-        
-        if (dateStr == null || dateStr.trim().isEmpty()) {
-            throw new IllegalArgumentException("Departure date must be provided");
-        }
-        
-        if (basePriceObj == null) {
-            throw new IllegalArgumentException("Base price must be provided");
-        }
-    }
-
-    private LocalDateTime parseDate(String dateStr) {
-        try {
-            return LocalDateTime.parse(dateStr);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid departure date format");
-        }
     }
 }

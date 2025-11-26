@@ -30,13 +30,11 @@ public class BookingHandler extends BaseHandler implements HttpHandler {
     }
 
     private void handleGet(HttpExchange exchange) throws IOException {
-        // BAD SMELL: Logic inside Controller (Smart Controller)
         Map<String, String> queryParams = parseQueryParams(exchange.getRequestURI().getQuery());
         
         String flightId = queryParams.get("flightId");
         String passengerName = queryParams.get("passengerName");
 
-        // BAD SMELL: Controller accessing repository directly to filter!
         List<Booking> bookings = bookingService.findAllBookings();
         
         List<Booking> filtered = bookings.stream()
@@ -54,19 +52,12 @@ public class BookingHandler extends BaseHandler implements HttpHandler {
             
             String flightId = body.get("flightId");
             String passengerName = body.get("passengerName");
-
-            // BAD SMELL: Validation in controller
-            validateBookingInput(flightId, passengerName);
-
             Booking booking = bookingService.createBooking(flightId, passengerName);
             sendJsonResponse(exchange, 201, booking);
 
         } catch (IllegalArgumentException e) {
-            // BAD SMELL: Catching domain exceptions in controller
             handleError(exchange, 400, e.getMessage());
         } catch (RuntimeException e) {
-            // BAD SMELL: Using RuntimeException for business logic errors
-            // Differentiate between not-found (404) and other errors (400)
             if (e.getMessage() != null && e.getMessage().toLowerCase().contains("not found")) {
                 handleError(exchange, 404, e.getMessage());
             } else {
@@ -78,13 +69,4 @@ public class BookingHandler extends BaseHandler implements HttpHandler {
         }
     }
 
-    private void validateBookingInput(String flightId, String passengerName) {
-        if (flightId == null || flightId.isEmpty()) {
-            throw new IllegalArgumentException("Flight id is required");
-        }
-        
-        if (passengerName == null || passengerName.isEmpty()) {
-            throw new IllegalArgumentException("Passenger name is required");
-        }
-    }
 }

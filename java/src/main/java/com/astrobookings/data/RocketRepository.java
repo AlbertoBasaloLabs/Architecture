@@ -1,7 +1,6 @@
 package com.astrobookings.data;
 
 import com.astrobookings.model.Rocket;
-import java.util.UUID;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,22 +17,16 @@ public class RocketRepository {
     }
 
     public Rocket save(Rocket rocket) {
-        // Validate name
         if (rocket.getName() == null || rocket.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Rocket name must be provided");
         }
-        // Validate capacity (existing rule)
+        if (rocket.getCapacity() <= 0) {
+            throw new IllegalArgumentException("Rocket capacity must be greater than 0");
+        }
         if (rocket.getCapacity() > 10) {
             throw new IllegalArgumentException("Rocket capacity cannot exceed 10");
         }
-        // Validate duplicate ID
-        if (rocket.getId() != null && db.containsKey(rocket.getId())) {
-            throw new IllegalArgumentException("Rocket with id " + rocket.getId() + " already exists");
-        }
-        // Assign a new ID if missing
-        if (rocket.getId() == null) {
-            rocket.setId(UUID.randomUUID().toString());
-        }
+
         db.put(rocket.getId(), rocket);
         return rocket;
     }

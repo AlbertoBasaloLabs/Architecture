@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class RocketHandler extends BaseHandler implements HttpHandler {
-    // BAD SMELL: Controller accessing Repository directly (No Service layer)
     private RocketRepository rocketRepository = new RocketRepository();
 
     @Override
@@ -36,23 +35,8 @@ public class RocketHandler extends BaseHandler implements HttpHandler {
         try {
             InputStream is = exchange.getRequestBody();
             Rocket rocket = objectMapper.readValue(is, Rocket.class);
-            
-            if (rocket.getName() == null || rocket.getName().trim().isEmpty()) {
-                throw new IllegalArgumentException("Rocket name cannot be empty");
-            }
-            if (rocket.getCapacity() <= 0) {
-                throw new IllegalArgumentException("Rocket capacity must be greater than 0");
-            }
-            if (rocket.getSpeed() != null && rocket.getSpeed() <= 0) {
-                throw new IllegalArgumentException("Rocket speed must be greater than 0");
-            }
-
-            if (rocket.getId() == null) {
-                rocket.setId(java.util.UUID.randomUUID().toString());
-            }
-            
+            rocket.setId(UUID.randomUUID().toString());
             rocketRepository.save(rocket);
-            
             String response = objectMapper.writeValueAsString(rocket);
             sendJsonResponse(exchange, 201, response);
         } catch (IllegalArgumentException e) {

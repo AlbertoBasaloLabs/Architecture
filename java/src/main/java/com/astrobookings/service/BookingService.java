@@ -20,7 +20,13 @@ public class BookingService {
     private BookingRepository bookingRepository = new BookingRepository();
 
     public Booking createBooking(String flightId, String passengerName) {
+        if (passengerName == null || passengerName.isEmpty()) {
+            throw new IllegalArgumentException("Passenger name is required");
+        }
         // 1. Get Flight
+        if (flightId == null || flightId.isEmpty()) {
+            throw new IllegalArgumentException("Flight id is required");
+        }
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new RuntimeException("Flight not found"));
 
