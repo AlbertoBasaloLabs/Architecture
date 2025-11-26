@@ -19,21 +19,20 @@ com.astrobookings
 ├── controller      # Capa de Entrada (HttpHandlers)
 ├── service         # Lógica de Negocio (Mezclada con orquestación)
 ├── data            # Acceso a Datos (Simulando DB)
-├── model           # Entidades Anémicas (Solo datos, getters/setters)
-└── AstroBookingsApp.java # Main class
+└── model           # Entidades Anémicas (Solo datos, getters/setters)
 ```
 
 ## 3. Modelo de Datos (Anémico)
 Clases simples con Getters y Setters. Sin lógica de negocio.
 
 *   **`Rocket`**:
-    *   `id` (String/Long)
+    *   `id` (String)
     *   `name` (String)
     *   `capacity` (int) - Capacidad total de pasajeros.
-    *   `speed` (double) - Campo cosmético sin uso funcional (dead code intencional).
+    *   `speed` (double/nullable) - Campo cosmético sin uso funcional (dead code intencional).
 *   **`Flight`**:
     *   `id` (String)
-    *   `rocketId` (String) - Referencia por ID (Bad smell: no referencia al objeto).
+    *   `rocketId` (String) - Referencia por ID
     *   `departureDate` (LocalDateTime)
     *   `basePrice` (double)
     *   `minPassengers` (int) - Mínimo de pasajeros para confirmar el vuelo (hardcoded a 5 en creación).
@@ -141,8 +140,8 @@ Estos son los puntos que los alumnos deberán detectar y corregir:
 ## 6. Plan de Trabajo (Paso a Paso)
 
 1.  **Inicialización**: Crear `pom.xml` con dependencia de Jackson.
-2.  **Capa de Datos**: Crear `RocketRepository`, `FlightRepository`, `BookingRepository` usando `HashMap` estáticos para persistencia entre requests. Pre-cargar algunos datos dummy (1 Cohete, 2 Vuelos).
+2.  **Capa de Datos**: Crear `RocketRepository`, `FlightRepository`, `BookingRepository` usando `HashMap` estáticos para persistencia entre requests. Pre-cargar algunos datos dummy (1 Cohete, 3 Vuelos).
 3.  **Capa de Modelo**: Crear las clases POJO.
 4.  **Capa de Servicio**: Implementar `BookingService` con toda la lógica "sucia".
 5.  **Capa Web**: Implementar `AppServer` con `HttpServer` y handlers para los endpoints.
-6.  **Verificación**: Probar con `curl` o Postman que se pueden crear reservas y se respeta la capacidad.
+6.  **Verificación**: Probar con `curl` que se pueden crear reservas, se rgestionan estados y se calculan precios.

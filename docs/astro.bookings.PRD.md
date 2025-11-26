@@ -1,4 +1,4 @@
-# AstroBookings - Briefing Funcional
+# AstroBookings - Product Requirements Document
 
 ## 1. Descripción General
 

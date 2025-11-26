@@ -4,7 +4,7 @@ Taller de Arquitectura de Software. Evolución desde las capas hasta hexagonal, 
 ## Briefing funcional
 
 - [Briefing funcional](docs/astro.bookings.briefing.md)
-
+- [Product Requirements Document](docs/astro.bookings.PRD.md)
 
 ## Implementación en Java
 
