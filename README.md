@@ -10,3 +10,9 @@ Taller de Arquitectura de Software. Evolución desde las capas hasta hexagonal, 
 
 - [Plan de implementación en capas](java/plan_implementacion_sucia.md)
 - [Java README](java/README.md)
+
+---
+
+- Author: [Alberto Basalo](https://albertobasalo.dev)
+- Academy: [Academy Organization](https://aicode.academy)
+- Laboratory: [Source Repository](https://github.com/AlbertoBasaloLabs/Architecture)
