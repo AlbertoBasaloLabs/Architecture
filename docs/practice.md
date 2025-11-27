@@ -5,8 +5,8 @@ Este ejercicio abarca las 8 lecciones y evoluciona una única aplicación backen
 
 | Lección | Evolución de la práctica                                            |
 | ------- | ------------------------------------------------------------------- |
-| 1       | Reconociendo el Deterioro Arquitectónic.                            |
-| 2       | Aplicar SRP/DI/DIP para limpiar dependencias y responsabilidades.   |
+| 1       | Reconociendo el Deterioro Arquitectónico.                            |
+| 2       | Aplicar SRP/ISP/DIP para limpiar dependencias y responsabilidades.   |
 | 3       | Convertir la funcionalidad principal a Hexagonal.                   |
 | 4       | Introducir casos de uso reales.                                     |
 | 5       | Descubrir bounded contexts del dominio espacial.                    |
@@ -16,29 +16,28 @@ Este ejercicio abarca las 8 lecciones y evoluciona una única aplicación backen
 
 ---
 
-## Lección 1 — Reconociendo el Deterioro Arquitectónico
+## Lección 1 Layered Architecture — Reconociendo el Deterioro Arquitectónico
 Comenzar con un diseño de capas intencionalmente deficiente:
 
-Problemas: No hay límites ni abstractions claras.
-- Las reglas de validación y de negocio están dispersas 
-- Las excepciones no siguen una estructura consistente.
-- No hay una responsabilidad clara por capa
+Señalar los problemas que se encuentran en el código.
+- [ ] Las reglas de validación y de negocio están dispersas.
+- [ ] Llamadas a repositorio en el controlador.
+- [ ] Acoplamientos por constructores de instancias.
+- [ ] Las excepciones no siguen una estructura consistente.
+- [ ] No hay una responsabilidad clara por capa.
 
-Objetivo: Establecer un reparto de responsabilidades claros.
--[ ] Usar DTOs para validar estructura, y llevar a nivel de servicio los valores y reglas de negocio
--[ ] Usar excepciones claras y consistentes. (Valorar usar una jerarquía de excepciones)
--[ ] Mover artefactos de infrastructura fuera de la capa de negocio
-
-## Lección 2 — Aplicando SRP, DI y DIP
+## Lección 2 SOLID — Aplicando SRP, ISP y DIP para limpiar dependencias y responsabilidades
 Realizar refactor para eliminar violaciones obvias:
 
-- Separar responsabilidades: pricing, capacity validation, booking creation.
-- Introducir interfaces para persistence.
+- [ ] Usar DTOs para validar estructura, y llevar a nivel de servicio los valores y reglas de negocio
+- [ ] Usar excepciones claras y consistentes. (Valorar usar una jerarquía de excepciones)
+- [ ] Mover artefactos de infrastructura fuera de la capa de negocio
+- [ ] Introducir interfaces para persistence.
 - Aplicar Dependency Injection para habilitar testing.
 
-Mantener la logic fuera de los controllers.
+Objetivo: Preparar el código para una arquitectura hexagonal.
 
-Objetivo: Preparar el código para una estructura más intencional.
+<!-- Work in progress: -->
 
 ## Lección 3 — Arquitectura Hexagonal (Ports & Adapters)
 Reescribir el flujo central de Booking usando ports/adapters:

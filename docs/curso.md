@@ -1,18 +1,23 @@
 # Arquitectura Software (20h, 4 sesiones × 2 lecciones)
 De lo simple y frágil a lo modular, expresivo y escalable.
 
----
-
 ## SESIÓN 1 — Por qué romper con las capas (Problemas + Principios)
 **Tema general:** Entender por qué las arquitecturas tradicionales colapsan y qué principios permiten construir sistemas más robustos.
 
-### 1. Señales de decadencia: problemas reales de la arquitectura por capas
+### 1. Layered Architecture 
+
+Señales de decadencia: problemas reales de la arquitectura por capas
+
 Arquitectura en capas, síntomas, acoplamientos ocultos, big ball of mud, problemas de testeo y de expresividad del dominio.
 
-### 2. Principios que cambian la arquitectura: SRP, DI, inversión de dependencias
+### 2. Principios SOLID
+
 Fundamentos para comenzar a invertir dependencias y separar responsabilidades.
 
 > Por qué la arquitectura en capas falla y qué principios permiten mejorar.
+
+<!-- Work in progress: -->
+
 ---
 
 ## SESIÓN 2 — Hexagonal en acción (Hexagonal + Use Cases)
