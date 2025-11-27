@@ -1,12 +1,11 @@
-# Practical Exercise Summary  
-**Domain:** Astro-Booking Backend (English terms: Rocket, Flight, Booking, Passenger, Capacity, Pricing, Discount…)
+# Resumen del Ejercicio Práctico
+**Dominio**: Backend de Astro-Reservas (Términos en inglés: Rocket, Flight, Booking, Passenger, Capacity, Pricing, Discount…)
 
-This exercise spans all 8 lessons and evolves a single backend application from a poorly structured layered design into a modular, hexagonal, DDD-based system.  
-All implementation is done in TypeScript (or language of choice) with simple in-memory persistence.
+Este ejercicio abarca las 8 lecciones y evoluciona una única aplicación backend desde un diseño de capas mal estructurado hacia un sistema modular, hexagonal y basado en DDD (Domain-Driven Design). Toda la implementación se realiza en Java con persistencia simple en memoria.
 
 | Lección | Evolución de la práctica                                            |
 | ------- | ------------------------------------------------------------------- |
-| 1       | Detectar problemas en arquitectura por capas de la app de reservas. |
+| 1       | Reconociendo el Deterioro Arquitectónic.                            |
 | 2       | Aplicar SRP/DI/DIP para limpiar dependencias y responsabilidades.   |
 | 3       | Convertir la funcionalidad principal a Hexagonal.                   |
 | 4       | Introducir casos de uso reales.                                     |
@@ -17,122 +16,127 @@ All implementation is done in TypeScript (or language of choice) with simple in-
 
 ---
 
-## Lesson 1 — Recognizing Architectural Decay
-Start with an intentionally bad layered design:
+## Lección 1 — Reconociendo el Deterioro Arquitectónico
+Comenzar con un diseño de capas intencionalmente deficiente:
 
-- Controllers contain business logic.  
-- Repositories leak technical details.  
-- Domain rules are scattered (capacity checks, minimum passengers, pricing rules).  
-- No clear boundaries or abstractions.
+Problemas: No hay límites ni abstractions claras.
+- Los Controllers contienen business logic y acceso directo a repositorios.
+- Las reglas de negocio están dispersas (capacity checks, minimum passengers, pricing rules).
+- Las excepciones no siguen una estructura consistente.
 
-**Goal:** Identify code smells and limitations before any refactor.
+Objetivo: Establecer un reparto de responsabilidades claros.
+-[ ] Usar DTOs a nivel de controller y validar estructura de datos de entrada.
+-[ ] Validar a nivel de servicio los valores y reglas de negocio
+-[ ] Usar excepciones claras y consistentes. (Valorar usar una jerarquía de excepciones)
 
----
+## Lección 2 — Aplicando SRP, DI y DIP
+Realizar refactor para eliminar violaciones obvias:
 
-## Lesson 2 — Applying SRP, DI and DIP
-Refactor to remove obvious violations:
+- Separar responsabilidades: pricing, capacity validation, booking creation.
+- Introducir interfaces para persistence.
+- Aplicar Dependency Injection para habilitar testing.
 
-- Separate responsibilities: pricing, capacity validation, booking creation.  
-- Introduce interfaces for persistence.  
-- Apply Dependency Injection to enable testing.  
-- Keep logic out of controllers.
+Mantener la logic fuera de los controllers.
 
-**Goal:** Prepare the code for a more intentional structure.
+Objetivo: Preparar el código para una estructura más intencional.
 
----
+## Lección 3 — Arquitectura Hexagonal (Ports & Adapters)
+Reescribir el flujo central de Booking usando ports/adapters:
 
-## Lesson 3 — Hexagonal Architecture (Ports & Adapters)
-Rewrite the core Booking flow using ports/adapters:
+El Domain en el centro (Booking, Rocket, Flight).
 
-- Domain at the center (Booking, Rocket, Flight).  
-- Port: `BookingRepository`.  
-- Adapter: in-memory repository.  
-- HTTP adapter as a thin entry point.
+Port: BookingRepository.
 
-**Goal:** The domain becomes independent from frameworks and infrastructure.
+Adapter: repositorio en memoria (in-memory repository).
 
----
+HTTP adapter como un punto de entrada ligero (thin entry point).
 
-## Lesson 4 — Use Cases as the Application Core
-Introduce explicit use cases:
+Objetivo: El Domain se vuelve independiente de frameworks e infrastructure.
 
-- Create `MakeBookingUseCase`.  
-- Controllers delegate to use cases.  
-- Domain holds rules (capacity, minimum passengers, pricing logic).  
-- Persistence only accessed through ports.
+## Lección 4 — Casos de Uso como el Núcleo de la Aplicación
+Introducir casos de uso explícitos:
 
-**Goal:** Business flows become clear, testable and framework-agnostic.
+Crear MakeBookingUseCase.
 
----
+Los Controllers delegan en casos de uso.
 
-## Lesson 5 — Discovering Bounded Contexts
-Analyze the domain and separate meaning:
+El Domain contiene las reglas (capacity, minimum passengers, pricing logic).
 
-Suggested bounded contexts:
+La Persistence solo se accede a través de ports.
 
-- **Bookings** — Handling reservations.  
-- **Fleet** — Managing Rockets, Flights, capacity and schedules.  
-- **Pricing** — Group discounts, advance-purchase discounts.  
-- **Passengers** — Passenger data and grouping.
+Objetivo: Los flujos de negocio se vuelven claros, testeables y agnósticos al framework.
 
-Create a Context Map describing relationships.
+## Lección 5 — Descubriendo Bounded Contexts
+Analizar el dominio y separar el significado:
 
-**Goal:** Understand the natural domain boundaries for later modularization.
+Bounded contexts sugeridos:
 
----
+Bookings — Manejo de reservas.
 
-## Lesson 6 — Tactical DDD (Entities, Value Objects, Aggregates)
-Model the domain properly:
+Fleet — Gestión de Rockets, Flights, capacity y horarios.
 
-- **Entities:** Booking, Rocket, Flight.  
-- **Value Objects:** Capacity, PassengerCount, BasePrice, Discount, BookingDate.  
-- **Aggregate:** `BookingAggregate`, enforcing invariants.  
-- **Domain Events:** `BookingConfirmed`, `FlightCapacityUpdated`.
+Pricing — Descuentos por grupo, descuentos por compra anticipada (advance-purchase discounts).
 
-**Goal:** Build a robust, expressive domain model that enforces rules internally.
+Passengers — Datos de pasajeros y agrupación.
 
----
+Crear un Context Map que describa las relaciones.
 
-## Lesson 7 — Modular Monolith Structure
-Restructure the project into functional modules (not layers):
+Objetivo: Comprender los límites naturales del dominio para una modularización posterior.
 
-/modules  
-	/bookings  
-	/fleet  
-	/pricing  
-	/passengers
+## Lección 6 — DDD Táctico (Entities, Value Objects, Aggregates)
+Modelar el dominio correctamente:
 
-Each module contains its own:
+Entities: Booking, Rocket, Flight.
 
-- Domain  
-- Use cases  
-- Ports  
-- Adapters  
-- Module API
+Value Objects: Capacity, PassengerCount, BasePrice, Discount, BookingDate.
 
-Introduce simple enforcement rules: no cross-module imports except through public APIs.
+Aggregate: BookingAggregate, que impone invariants.
 
-**Goal:** A clean monolith with strict boundaries and high cohesion.
+Domain Events: BookingConfirmed, FlightCapacityUpdated.
 
----
+Objetivo: Construir un modelo de dominio robusto y expresivo que aplique reglas internamente.
 
-## Lesson 8 — Preparing for Microservice Extraction
-Evaluate which module could be extracted:
+## Lección 7 — Estructura de Monolito Modular
+Reestructurar el proyecto en módulos funcionales (no capas):
 
-- Use signals: change frequency, scaling needs, deployment cadence.  
-- Likely candidate: **Pricing** (volatile, experimental).  
-- Draft a migration plan:
-  - Define API contracts.  
-  - Prepare an Anti-Corruption Layer.  
-  - Move persistence behind a dedicated adapter.
+/modules /bookings /fleet /pricing /passengers
 
-**Goal:** Understand evolutionary architecture without prematurely distributing the system.
+Cada módulo contiene su propio:
 
----
+Domain
 
-## Final Result
-Across the 8 lessons, the “Rocket Travel Booking” exercise progresses from:
+Use cases
 
-**Big Ball of Mud → Clean Components → Hexagonal → DDD Tactical → Modular Monolith → Ready-to-Extract Microservices**
+Ports
 
-The domain remains the same, but the architecture evolves step by step, reinforcing every lesson with concrete, cumulative practice.
+Adapters
+
+Module API
+
+Introducir reglas de aplicación simples: no se permiten importaciones cruzadas entre módulos, excepto a través de APIs públicas.
+
+Objetivo: Un monolito limpio con límites estrictos y alta cohesión.
+
+## 	Lección 8 — Preparación para la Extracción de Microservicios
+Evaluar qué módulo podría ser extraído:
+
+Usar señales: frecuencia de cambio, necesidades de scaling, cadencia de deployment.
+
+Candidato probable: Pricing (volátil, experimental).
+
+Bosquejar un plan de migración:
+
+Definir API contracts.
+
+Preparar una Anti-Corruption Layer.
+
+Mover la persistence detrás de un adapter dedicado.
+
+Objetivo: Comprender la arquitectura evolutiva sin distribuir prematuramente el sistema.
+
+## Resultado Final
+A lo largo de las 8 lecciones, el ejercicio "Rocket Travel Booking" progresa de:
+
+Big Ball of Mud → Clean Components → Hexagonal → DDD Tactical → Modular Monolith → Ready-to-Extract Microservices
+
+El dominio sigue siendo el mismo, pero la arquitectura evoluciona paso a paso, reforzando cada lección con práctica concreta y acumulativa.

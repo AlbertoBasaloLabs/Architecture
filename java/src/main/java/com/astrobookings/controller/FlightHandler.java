@@ -39,9 +39,8 @@ public class FlightHandler extends BaseHandler implements HttpHandler {
 
     private void handlePost(HttpExchange exchange) throws IOException {
         try {
-            InputStream is = exchange.getRequestBody();
-            Map<String, Object> body = objectMapper.readValue(is, Map.class);
-            
+            InputStream inputStream = exchange.getRequestBody();
+            Map<String, Object> body = objectMapper.readValue( inputStream, Map.class);
             String rocketId = (String) body.get("rocketId");
             String dateStr = (String) body.get("departureDate");
             Object basePriceObj = body.get("basePrice");

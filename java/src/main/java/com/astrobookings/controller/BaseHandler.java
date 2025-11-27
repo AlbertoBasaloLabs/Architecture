@@ -24,6 +24,10 @@ public abstract class BaseHandler {
 
     /**
      * Send a JSON response with the given status code and content.
+     * @param exchange The HTTP exchange to send the response to.
+     * @param statusCode The status code to send.
+     * @param jsonContent The JSON content to send.
+     * @throws IOException If an I/O error occurs.
      */
     protected void sendJsonResponse(HttpExchange exchange, int statusCode, String jsonContent) throws IOException {
         exchange.getResponseHeaders().set("Content-Type", "application/json");
@@ -35,6 +39,10 @@ public abstract class BaseHandler {
 
     /**
      * Send a JSON response with an object that will be serialized.
+     * @param exchange The HTTP exchange to send the response to.
+     * @param statusCode The status code to send.
+     * @param object The object to serialize and send as JSON.
+     * @throws IOException If an I/O error occurs.
      */
     protected void sendJsonResponse(HttpExchange exchange, int statusCode, Object object) throws IOException {
         String jsonContent = objectMapper.writeValueAsString(object);
@@ -43,6 +51,10 @@ public abstract class BaseHandler {
 
     /**
      * Send an error response with the given status code and message.
+     * @param exchange The HTTP exchange to send the response to.
+     * @param statusCode The status code to send.
+     * @param message The error message to send.
+     * @throws IOException If an I/O error occurs.
      */
     protected void handleError(HttpExchange exchange, int statusCode, String message) throws IOException {
         Map<String, String> errorResponse = new HashMap<>();
@@ -52,6 +64,10 @@ public abstract class BaseHandler {
 
     /**
      * Send a plain text response (for simple responses without JSON).
+     * @param exchange The HTTP exchange to send the response to.
+     * @param statusCode The status code to send.
+     * @param content The content to send as plain text.
+     * @throws IOException If an I/O error occurs.
      */
     protected void sendTextResponse(HttpExchange exchange, int statusCode, String content) throws IOException {
         exchange.getResponseHeaders().set("Content-Type", "text/plain");
@@ -63,7 +79,8 @@ public abstract class BaseHandler {
 
     /**
      * Parse query parameters from a query string.
-     * Returns a map of parameter names to values.
+     * @param query The query string to parse.
+     * @return A map of parameter names to values.
      */
     protected Map<String, String> parseQueryParams(String query) {
         Map<String, String> params = new HashMap<>();
@@ -86,6 +103,9 @@ public abstract class BaseHandler {
 
     /**
      * Get a query parameter value, or return null if not present.
+     * @param exchange The HTTP exchange to get the query parameter from.
+     * @param paramName The name of the query parameter to get.
+     * @return The value of the query parameter, or null if not present.
      */
     protected String getQueryParam(HttpExchange exchange, String paramName) {
         String query = exchange.getRequestURI().getQuery();
