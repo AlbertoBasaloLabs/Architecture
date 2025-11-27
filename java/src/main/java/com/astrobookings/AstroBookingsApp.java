@@ -1,9 +1,9 @@
 package com.astrobookings;
 
-import com.astrobookings.application.AdminHandler;
-import com.astrobookings.application.BookingHandler;
-import com.astrobookings.application.FlightHandler;
-import com.astrobookings.application.RocketHandler;
+import com.astrobookings.app.AdminHandler;
+import com.astrobookings.app.BookingHandler;
+import com.astrobookings.app.FlightHandler;
+import com.astrobookings.app.RocketHandler;
 
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;

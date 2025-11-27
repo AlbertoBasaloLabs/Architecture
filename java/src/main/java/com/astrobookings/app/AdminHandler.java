@@ -1,4 +1,4 @@
-package com.astrobookings.application;
+package com.astrobookings.app;
 
 import com.astrobookings.business.FlightCancellationService;
 import com.fasterxml.jackson.databind.ObjectMapper;

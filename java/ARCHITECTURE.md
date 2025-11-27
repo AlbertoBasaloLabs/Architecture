@@ -41,10 +41,10 @@ La arquitectura actual es **intencionalmente deficiente** para propósitos educa
 ```
 java/
 ├── src/main/java/com/astrobookings/
-│   ├── application/        # HTTP Handlers (Presentation Layer)
-│   ├── business/           # Services & Gateways (Business Layer)
-│   ├── persistence/        # Repositories (Data Access Layer)
-│   └── model/              # Domain Models (Anemic)
+│   ├── app/        # HTTP Handlers (Presentation Layer)
+│   ├── business/   # Services & Gateways (Business Layer)
+│   ├── database/   # Repositories (Data Access Layer)
+│   └── models/     # Domain Models (Anemic)
 │
 ├── pom.xml
 ├── README.md
@@ -52,10 +52,10 @@ java/
 ```
 
 **Capas**:
-- **application**: Handlers HTTP (Rocket, Flight, Booking, Admin)
+- **app**: Handlers HTTP (Rocket, Flight, Booking, Admin)
 - **business**: Services (Flight, Booking, Cancellation) + Gateways (Payment, Notification)
-- **persistence**: Repositories in-memory (Rocket, Flight, Booking)
-- **model**: Entidades (Rocket, Flight, Booking, FlightStatus)
+- **database**: Repositories in-memory (Rocket, Flight, Booking)
+- **models**: Entidades (Rocket, Flight, Booking, FlightStatus)
 
 ## Flujo de Datos
 

@@ -1,4 +1,4 @@
-package com.astrobookings.application;
+package com.astrobookings.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

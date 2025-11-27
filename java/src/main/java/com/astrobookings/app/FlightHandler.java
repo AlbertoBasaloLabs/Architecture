@@ -1,6 +1,6 @@
-package com.astrobookings.application;
+package com.astrobookings.app;
 
-import com.astrobookings.model.Flight;
+import com.astrobookings.models.Flight;
 import com.astrobookings.business.FlightService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

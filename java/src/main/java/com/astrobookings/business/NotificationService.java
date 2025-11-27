@@ -1,6 +1,6 @@
 package com.astrobookings.business;
 
-import com.astrobookings.model.Booking;
+import com.astrobookings.models.Booking;
 
 import java.util.List;
 

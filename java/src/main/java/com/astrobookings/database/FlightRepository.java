@@ -1,7 +1,7 @@
-package com.astrobookings.persistence;
+package com.astrobookings.database;
 
-import com.astrobookings.model.Flight;
-import com.astrobookings.model.FlightStatus;
+import com.astrobookings.models.Flight;
+import com.astrobookings.models.FlightStatus;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;

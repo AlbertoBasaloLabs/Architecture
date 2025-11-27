@@ -1,6 +1,6 @@
-package com.astrobookings.persistence;
+package com.astrobookings.database;
 
-import com.astrobookings.model.Rocket;
+import com.astrobookings.models.Rocket;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

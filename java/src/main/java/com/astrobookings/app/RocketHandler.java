@@ -1,7 +1,7 @@
-package com.astrobookings.application;
+package com.astrobookings.app;
 
-import com.astrobookings.persistence.RocketRepository;
-import com.astrobookings.model.Rocket;
+import com.astrobookings.database.RocketRepository;
+import com.astrobookings.models.Rocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;

@@ -1,9 +1,9 @@
 package com.astrobookings.business;
 
-import com.astrobookings.persistence.FlightRepository;
-import com.astrobookings.persistence.RocketRepository;
-import com.astrobookings.model.Flight;
-import com.astrobookings.model.FlightStatus;
+import com.astrobookings.database.FlightRepository;
+import com.astrobookings.database.RocketRepository;
+import com.astrobookings.models.Flight;
+import com.astrobookings.models.FlightStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;

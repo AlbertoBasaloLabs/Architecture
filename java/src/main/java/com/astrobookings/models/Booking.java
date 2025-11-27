@@ -1,4 +1,4 @@
-package com.astrobookings.model;
+package com.astrobookings.models;
 
 import java.time.LocalDateTime;
 
