@@ -1,7 +1,7 @@
-package com.astrobookings.service;
+package com.astrobookings.business;
 
-import com.astrobookings.data.FlightRepository;
-import com.astrobookings.data.RocketRepository;
+import com.astrobookings.persistence.FlightRepository;
+import com.astrobookings.persistence.RocketRepository;
 import com.astrobookings.model.Flight;
 import com.astrobookings.model.FlightStatus;
 

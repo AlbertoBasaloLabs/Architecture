@@ -1,7 +1,7 @@
-package com.astrobookings.controller;
+package com.astrobookings.application;
 
 import com.astrobookings.model.Booking;
-import com.astrobookings.service.BookingService;
+import com.astrobookings.business.BookingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -58,7 +58,9 @@ public class BookingHandler extends BaseHandler implements HttpHandler {
         } catch (IllegalArgumentException e) {
             handleError(exchange, 400, e.getMessage());
         } catch (RuntimeException e) {
-            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("not found")) {
+            if (e.getMessage() != null && e.getMessage().toLowerCase().contains("payment failed")) {
+                handleError(exchange, 402, e.getMessage());
+            } else if (e.getMessage() != null && e.getMessage().toLowerCase().contains("not found")) {
                 handleError(exchange, 404, e.getMessage());
             } else {
                 handleError(exchange, 400, e.getMessage());

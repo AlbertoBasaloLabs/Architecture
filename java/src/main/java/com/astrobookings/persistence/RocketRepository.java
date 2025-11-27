@@ -1,4 +1,4 @@
-package com.astrobookings.data;
+package com.astrobookings.persistence;
 
 import com.astrobookings.model.Rocket;
 import java.util.HashMap;

@@ -8,15 +8,17 @@ public class Booking {
     private String passengerName;
     private LocalDateTime bookingDate;
     private double finalPrice;
+    private String paymentTransactionId;
 
     public Booking() {}
 
-    public Booking(String id, String flightId, String passengerName, LocalDateTime bookingDate, double finalPrice) {
+    public Booking(String id, String flightId, String passengerName, LocalDateTime bookingDate, double finalPrice, String paymentTransactionId) {
         this.id = id;
         this.flightId = flightId;
         this.passengerName = passengerName;
         this.bookingDate = bookingDate;
         this.finalPrice = finalPrice;
+        this.paymentTransactionId = paymentTransactionId;
     }
 
     public String getId() { return id; }
@@ -33,4 +35,7 @@ public class Booking {
 
     public double getFinalPrice() { return finalPrice; }
     public void setFinalPrice(double finalPrice) { this.finalPrice = finalPrice; }
+
+    public String getPaymentTransactionId() { return paymentTransactionId; }
+    public void setPaymentTransactionId(String paymentTransactionId) { this.paymentTransactionId = paymentTransactionId; }
 }

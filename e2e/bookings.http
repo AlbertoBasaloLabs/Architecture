@@ -6,6 +6,7 @@
 
 ### Create a new booking (valid payload)
 # Expected: 201 Created
+# Console: [PAYMENT GATEWAY] Processing payment... Transaction ID: TXN-XXXXXXXX
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
@@ -46,6 +47,7 @@ Content-Type: application/json
 
 ### Create fifth booking (should trigger SCHEDULED -> CONFIRMED transition)
 # Expected: 201 Created, flight status should change to CONFIRMED
+# Console: [NOTIFICATION SERVICE] Flight {id} CONFIRMED - Notifying 5 passenger(s)
 POST http://localhost:8080/bookings
 Content-Type: application/json
 
@@ -55,11 +57,50 @@ Content-Type: application/json
 }
 
 ###############################################################################
+# ADMIN ENDPOINT - Flight Cancellation
+###############################################################################
+
+### Trigger flight cancellation check
+# Expected: 200 OK with count of cancelled flights
+# Console: [CANCELLATION SERVICE] Cancelling flight... [PAYMENT GATEWAY] Processing refund...
+# Note: Only cancels SCHEDULED flights departing within 7 days with < 5 passengers
+POST http://localhost:8080/admin/cancel-flights
+Content-Type: application/json
+
+###############################################################################
+# PAYMENT FAILURE TEST
+###############################################################################
+
+### Create a flight with very high price to test payment failure
+# First create a flight with basePrice > 10000
+POST http://localhost:8080/flights
+Content-Type: application/json
+
+{
+  "rocketId": "00000000-0000-0000-0000-000000000001",
+  "departureDate": "2026-06-01T10:00:00",
+  "basePrice": 15000.0
+}
+
+### Now try to book it (should fail with 402 Payment Required)
+# Expected: 402 Payment Required
+# Console: [PAYMENT GATEWAY] Payment FAILED - Amount exceeds limit
+# Note: Replace {flightId} with the ID from the previous response
+POST http://localhost:8080/bookings
+Content-Type: application/json
+
+{
+  "flightId": "{flightId}",
+  "passengerName": "Rich Passenger"
+}
+
+###############################################################################
 # QUERY TESTS - Filtering Bookings
 ###############################################################################
 
 ### Get all bookings (no filter)
 # Expected: 200 OK
+# Note: Response now includes paymentTransactionId field
 GET http://localhost:8080/bookings
 Accept: application/json
 

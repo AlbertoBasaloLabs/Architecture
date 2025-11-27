@@ -1,7 +1,7 @@
-package com.astrobookings.controller;
+package com.astrobookings.application;
 
 import com.astrobookings.model.Flight;
-import com.astrobookings.service.FlightService;
+import com.astrobookings.business.FlightService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

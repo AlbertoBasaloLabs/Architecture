@@ -1,8 +1,9 @@
 package com.astrobookings;
 
-import com.astrobookings.controller.BookingHandler;
-import com.astrobookings.controller.FlightHandler;
-import com.astrobookings.controller.RocketHandler;
+import com.astrobookings.application.AdminHandler;
+import com.astrobookings.application.BookingHandler;
+import com.astrobookings.application.FlightHandler;
+import com.astrobookings.application.RocketHandler;
 
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -16,6 +17,7 @@ public class AstroBookingsApp {
         server.createContext("/flights", new FlightHandler());
         server.createContext("/bookings", new BookingHandler());
         server.createContext("/rockets", new RocketHandler());
+        server.createContext("/admin/cancel-flights", new AdminHandler());
 
         server.setExecutor(null); // creates a default executor
         server.start();

@@ -1,8 +1,8 @@
-package com.astrobookings.service;
+package com.astrobookings.business;
 
-import com.astrobookings.data.BookingRepository;
-import com.astrobookings.data.FlightRepository;
-import com.astrobookings.data.RocketRepository;
+import com.astrobookings.persistence.BookingRepository;
+import com.astrobookings.persistence.FlightRepository;
+import com.astrobookings.persistence.RocketRepository;
 import com.astrobookings.model.Booking;
 import com.astrobookings.model.Flight;
 import com.astrobookings.model.FlightStatus;
@@ -17,6 +17,8 @@ public class BookingService {
     private FlightRepository flightRepository = new FlightRepository();
     private RocketRepository rocketRepository = new RocketRepository();
     private BookingRepository bookingRepository = new BookingRepository();
+    private PaymentGateway paymentGateway = new PaymentGateway();
+    private NotificationService notificationService = new NotificationService();
 
     public Booking createBooking(String flightId, String passengerName) {
         if (passengerName == null || passengerName.isEmpty()) {
@@ -46,21 +48,33 @@ public class BookingService {
             price = price * (1 - DISCOUNT); 
         }
 
+        // Process payment before creating booking
+        String bookingId = UUID.randomUUID().toString();
+        String transactionId;
+        try {
+            transactionId = paymentGateway.processPayment(bookingId, price);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Payment failed: " + e.getMessage());
+        }
+
         Booking booking = new Booking(
-                UUID.randomUUID().toString(),
+                bookingId,
                 flightId,
                 passengerName,
                 LocalDateTime.now(),
-                price
+                price,
+                transactionId
         );
 
         bookingRepository.save(booking);
 
         List<Booking> updatedBookings = bookingRepository.findByFlightId(flightId);
         boolean statusChanged = false;
+        boolean flightConfirmed = false;
         if (updatedBookings.size() >= flight.getMinPassengers() && flight.getStatus() == FlightStatus.SCHEDULED) {
             flight.setStatus(FlightStatus.CONFIRMED);
             statusChanged = true;
+            flightConfirmed = true;
         }
         if (updatedBookings.size() >= rocket.getCapacity()) {
             flight.setStatus(FlightStatus.SOLD_OUT);
@@ -68,6 +82,11 @@ public class BookingService {
         }
         if (statusChanged) {
             flightRepository.save(flight);
+        }
+        
+        // Send notification if flight was just confirmed
+        if (flightConfirmed) {
+            notificationService.notifyFlightConfirmed(flightId, updatedBookings);
         }
 
         return booking;
