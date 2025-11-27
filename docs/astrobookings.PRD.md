@@ -4,7 +4,7 @@
 
 **AstroBookings** es una aplicación de reservas para viajes espaciales. Permite a los usuarios consultar vuelos disponibles, realizar reservas de plazas en cohetes espaciales, y gestionar la información de cohetes y vuelos.
 
-El sistema gestiona la capacidad de los cohetes, aplica políticas de precios con descuentos por reserva anticipada, y confirma automáticamente los vuelos cuando se alcanza un mínimo de pasajeros.
+El sistema gestiona la capacidad de los cohetes, aplica políticas de precios con descuentos por reserva anticipada, confirma automáticamente los vuelos cuando se alcanza un mínimo de pasajeros, notifica a los usuarios sobre cambios de estado en sus vuelos, y procesa pagos y devoluciones mediante integración con un gateway de pagos.
 
 ---
 
@@ -52,8 +52,11 @@ Representa un viaje espacial programado en un cohete específico.
 **Transiciones de Estado Automáticas:**
 
 1. **SCHEDULED → CONFIRMED**: Cuando el número de reservas alcanza el mínimo de pasajeros (5)
+   - Se debe notificar a todos los pasajeros con reservas en el vuelo
 2. **SCHEDULED/CONFIRMED → SOLD_OUT**: Cuando se crea la última reserva que alcanza la capacidad máxima del cohete
 3. **SCHEDULED → CANCELLED**: Si a falta de una semana del vuelo no se ha alcanzado el mínimo de pasajeros
+   - Se debe notificar a todos los pasajeros con reservas en el vuelo
+   - Se debe procesar la devolución del pago para todas las reservas del vuelo mediante el gateway de pagos
 
 **Restricciones de Reserva por Estado:**
 - **SCHEDULED**: Se permiten nuevas reservas
@@ -188,7 +191,12 @@ El precio final se calcula aplicando descuentos sobre el precio base del vuelo. 
    - Se parte del precio base del vuelo
    - Si la reserva se realiza con más de 30 días de antelación respecto a la fecha de salida, se aplica un 10% de descuento
 
-3. **Confirmación Automática del Vuelo:**
+3. **Procesamiento de Pago:**
+   - Se realiza una llamada al gateway de pagos con el precio final calculado
+   - Si el pago es rechazado, la reserva no se crea y se devuelve un error al usuario
+   - Si el pago es exitoso, se almacena el identificador de la transacción con la reserva
+
+4. **Confirmación Automática del Vuelo:**
    - Después de crear la reserva, se verifica el número total de reservas
    - Si se alcanza o supera el mínimo de pasajeros (5) y el vuelo está en estado SCHEDULED, el estado cambia automáticamente a CONFIRMED
 
@@ -230,8 +238,11 @@ Los descuentos se aplican según las siguientes condiciones, evaluadas en orden 
 **Estados y Transiciones:**
 - Los vuelos se crean en estado **SCHEDULED**
 - Cuando se alcanza el mínimo de pasajeros (5), el estado cambia a **CONFIRMED**
+  - Se notifica a todos los pasajeros del vuelo
 - Cuando se alcanza la capacidad máxima del cohete, el estado cambia a **SOLD_OUT**
 - Si a falta de 1 semana del vuelo no se alcanza el mínimo de pasajeros, el estado cambia a **CANCELLED**
+  - Se notifica a todos los pasajeros del vuelo
+  - Se procesa la devolución del pago para todas las reservas mediante el gateway de pagos
 
 **Restricciones:**
 - No se permiten reservas en vuelos con estado **SOLD_OUT** o **CANCELLED**
@@ -244,6 +255,23 @@ Los descuentos se aplican según las siguientes condiciones, evaluadas en orden 
 ### 4.4 Restricciones Temporales
 - Solo se muestran vuelos con fecha de salida futura
 - Los vuelos solo pueden programarse hasta 1 año en el futuro
+
+### 4.5 Integración con Gateway de Pagos
+
+**Procesamiento de Pagos:**
+- Al crear una reserva, se debe realizar una llamada al gateway de pagos para procesar el cobro del precio final
+- La reserva solo se crea si el pago es exitoso
+- Se almacena el identificador de la transacción de pago junto con la reserva
+
+**Procesamiento de Devoluciones:**
+- Cuando un vuelo se cancela automáticamente (estado CANCELLED), se debe procesar la devolución del pago para todas las reservas asociadas
+- Se realiza una llamada al gateway de pagos por cada reserva utilizando el identificador de transacción almacenado
+- Las devoluciones se procesan de forma asíncrona
+
+**Manejo de Errores:**
+- Si el pago falla al crear una reserva, se devuelve un error 402 Payment Required
+- Si una devolución falla, se registra el error pero no se bloquea la cancelación del vuelo
+- Se debe implementar un mecanismo de reintentos para devoluciones fallidas
 
 ---
 
@@ -302,6 +330,11 @@ Los descuentos se aplican según las siguientes condiciones, evaluadas en orden 
 
 ### Errores de Existencia (404 Not Found)
 - Referencia a entidad inexistente (cohete o vuelo no encontrado)
+
+### Errores de Pago (402 Payment Required)
+- Pago rechazado por el gateway de pagos
+- Fondos insuficientes
+- Error en los datos de pago
 
 ### Errores del Servidor (500 Internal Server Error)
 - Errores inesperados del sistema

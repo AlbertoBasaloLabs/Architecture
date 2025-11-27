@@ -7,6 +7,8 @@ AstroBookings es una aplicación de reservas para viajes espaciales. Gestiona co
 - Garantizar reglas de negocio de capacidad y estados.  
 - Aplicar descuentos automáticos según contexto.  
 - Mostrar vuelos futuros y gestionar reservas asociadas.  
+- Notificar por a los usuarios cuando un vuelo se confirme o cancele.  
+- Procesar pagos mediante gateway de pagos y gestionar devoluciones.
 
 ## Entidades principales
 
@@ -34,9 +36,12 @@ AstroBookings es una aplicación de reservas para viajes espaciales. Gestiona co
 
 ### Confirmación automática
 - Si un vuelo alcanza el mínimo de pasajeros → `CONFIRMED`.  
+- Notificar a los pasajeros.
 
 ### Cancelación automática
 - Si falta 1 semana y no se llegó al mínimo → `CANCELLED`.  
+- Notificar a los pasajeros.  
+- Procesar devolución del pago mediante gateway de pagos.
 
 ### Política de descuentos
 Reglas aplicadas en orden de precedencia (solo una por reserva):  
@@ -58,5 +63,10 @@ Reglas aplicadas en orden de precedencia (solo una por reserva):
 
 ### Gestión de Bookings
 - Crear reservas en vuelos válidos calculando precio con descuentos.  
-- Consultar reservas por vuelo o pasajero.  
+- Procesar pago mediante gateway de pagos tras crear la reserva.  
+- Consultar reservas por vuelo o pasajero.
+
+### Integración con Gateway de Pagos
+- Procesar pago al crear una reserva.  
+- Procesar devolución cuando un vuelo se cancela.  
 
