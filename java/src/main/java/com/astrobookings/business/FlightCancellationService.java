@@ -10,10 +10,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-/**
- * Service for handling automatic flight cancellations.
- * This is an intentionally "dirty" implementation with direct dependencies.
- */
 public class FlightCancellationService {
     private FlightRepository flightRepository = new FlightRepository();
     private BookingRepository bookingRepository = new BookingRepository();
@@ -22,13 +18,6 @@ public class FlightCancellationService {
     
     private static final int CANCELLATION_THRESHOLD_DAYS = 7;
     
-    /**
-     * Checks all scheduled flights and cancels those departing within 7 days
-     * that haven't reached minimum passenger requirements.
-     * Processes refunds and sends notifications for cancelled flights.
-     * 
-     * @return Number of flights cancelled
-     */
     public int cancelFlightsWithInsufficientPassengers() {
         List<Flight> allFlights = flightRepository.findAll();
         int cancelledCount = 0;
@@ -37,23 +26,22 @@ public class FlightCancellationService {
         LocalDateTime cancellationThreshold = now.plusDays(CANCELLATION_THRESHOLD_DAYS);
         
         for (Flight flight : allFlights) {
-            // Only check scheduled flights
             if (flight.getStatus() != FlightStatus.SCHEDULED) {
                 continue;
             }
             
-            // Check if flight departs within the cancellation threshold
+            if (flight.getDepartureDate().isAfter(cancellationThreshold)) {
+                continue;
+            }
             if (flight.getDepartureDate().isAfter(cancellationThreshold)) {
                 continue;
             }
             
-            // Check if flight has reached minimum passengers
             List<Booking> bookings = bookingRepository.findByFlightId(flight.getId());
             if (bookings.size() >= flight.getMinPassengers()) {
                 continue;
             }
             
-            // Cancel the flight
             System.out.println("[CANCELLATION SERVICE] Cancelling flight " + flight.getId() + 
                              " - Only " + bookings.size() + "/" + flight.getMinPassengers() + 
                              " passengers, departing in " + 
@@ -62,7 +50,6 @@ public class FlightCancellationService {
             flight.setStatus(FlightStatus.CANCELLED);
             flightRepository.save(flight);
             
-            // Process refunds for all bookings
             for (Booking booking : bookings) {
                 try {
                     paymentGateway.processRefund(booking.getPaymentTransactionId(), booking.getFinalPrice());
@@ -72,7 +59,6 @@ public class FlightCancellationService {
                 }
             }
             
-            // Send cancellation notifications
             notificationService.notifyFlightCancelled(flight.getId(), bookings);
             
             cancelledCount++;

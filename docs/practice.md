@@ -20,14 +20,14 @@ Este ejercicio abarca las 8 lecciones y evoluciona una única aplicación backen
 Comenzar con un diseño de capas intencionalmente deficiente:
 
 Problemas: No hay límites ni abstractions claras.
-- Los Controllers contienen business logic y acceso directo a repositorios.
-- Las reglas de negocio están dispersas (capacity checks, minimum passengers, pricing rules).
+- Las reglas de validación y de negocio están dispersas 
 - Las excepciones no siguen una estructura consistente.
+- No hay una responsabilidad clara por capa
 
 Objetivo: Establecer un reparto de responsabilidades claros.
--[ ] Usar DTOs a nivel de controller y validar estructura de datos de entrada.
--[ ] Validar a nivel de servicio los valores y reglas de negocio
+-[ ] Usar DTOs para validar estructura, y llevar a nivel de servicio los valores y reglas de negocio
 -[ ] Usar excepciones claras y consistentes. (Valorar usar una jerarquía de excepciones)
+-[ ] Mover artefactos de infrastructura fuera de la capa de negocio
 
 ## Lección 2 — Aplicando SRP, DI y DIP
 Realizar refactor para eliminar violaciones obvias:
