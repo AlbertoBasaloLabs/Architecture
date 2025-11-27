@@ -6,8 +6,6 @@
 
 El sistema gestiona la capacidad de los cohetes, aplica políticas de precios con descuentos por reserva anticipada, confirma automáticamente los vuelos cuando se alcanza un mínimo de pasajeros, notifica a los usuarios sobre cambios de estado en sus vuelos, y procesa pagos y devoluciones mediante integración con un gateway de pagos.
 
----
-
 ## 2. Entidades del Dominio
 
 ### 2.1 Cohete (Rocket)
@@ -22,8 +20,6 @@ Representa una nave espacial que puede transportar pasajeros.
 **Reglas de Negocio:**
 - El nombre es obligatorio
 - La capacidad máxima permitida es de 10 pasajeros
-
----
 
 ### 2.2 Vuelo (Flight)
 Representa un viaje espacial programado en un cohete específico.
@@ -64,8 +60,6 @@ Representa un viaje espacial programado en un cohete específico.
 - **SOLD_OUT**: NO se permiten nuevas reservas (capacidad completa)
 - **CANCELLED**: NO se permiten nuevas reservas (vuelo cancelado)
 
----
-
 ### 2.3 Reserva (Booking)
 Representa la reserva de un pasajero en un vuelo específico.
 
@@ -94,8 +88,6 @@ El precio final se calcula aplicando descuentos sobre el precio base del vuelo. 
 
 > **Nota**: Solo se aplica un descuento por reserva. Si se cumplen múltiples condiciones, prevalece la primera en el orden de precedencia.
 
----
-
 ## 3. Funcionalidades
 
 ### 3.1 Gestión de Cohetes
@@ -106,8 +98,6 @@ El precio final se calcula aplicando descuentos sobre el precio base del vuelo. 
 **Descripción:** Obtiene la lista completa de cohetes disponibles en el sistema.
 
 **Respuesta:** Lista de cohetes con todos sus atributos.
-
----
 
 #### Crear Cohete
 **Endpoint:** `POST /rockets`
@@ -125,8 +115,6 @@ El precio final se calcula aplicando descuentos sobre el precio base del vuelo. 
 
 **Respuesta:** Datos del cohete creado con su identificador asignado.
 
----
-
 ### 3.2 Gestión de Vuelos
 
 #### Listar Vuelos Disponibles
@@ -139,7 +127,6 @@ El precio final se calcula aplicando descuentos sobre el precio base del vuelo. 
 
 **Respuesta:** Lista de vuelos que cumplen los criterios de búsqueda.
 
----
 
 #### Crear Vuelo
 **Endpoint:** `POST /flights`
@@ -162,8 +149,6 @@ El precio final se calcula aplicando descuentos sobre el precio base del vuelo. 
 - El mínimo de pasajeros se establece en 5 por defecto
 
 **Respuesta:** Datos del vuelo creado con su identificador asignado.
-
----
 
 ### 3.3 Gestión de Reservas
 
@@ -202,8 +187,6 @@ El precio final se calcula aplicando descuentos sobre el precio base del vuelo. 
 
 **Respuesta:** Datos de la reserva creada incluyendo el precio final calculado.
 
----
-
 #### Consultar Reservas
 **Endpoint:** `GET /bookings`
 
@@ -216,8 +199,6 @@ El precio final se calcula aplicando descuentos sobre el precio base del vuelo. 
 - Sin filtros: devuelve todas las reservas del sistema
 
 **Respuesta:** Lista de reservas que cumplen los criterios de búsqueda.
-
----
 
 ## 4. Reglas de Negocio Globales
 
@@ -273,8 +254,6 @@ Los descuentos se aplican según las siguientes condiciones, evaluadas en orden 
 - Si una devolución falla, se registra el error pero no se bloquea la cancelación del vuelo
 - Se debe implementar un mecanismo de reintentos para devoluciones fallidas
 
----
-
 ## 5. Casos de Uso Principales
 
 ### Caso de Uso 1: Reservar un Viaje Espacial
@@ -299,8 +278,6 @@ Los descuentos se aplican según las siguientes condiciones, evaluadas en orden 
 4. El sistema crea el vuelo en estado SCHEDULED
 5. El vuelo queda disponible para reservas
 
----
-
 ## 6. Datos de Ejemplo
 
 ### Cohete Predefinido
@@ -319,8 +296,6 @@ Los descuentos se aplican según las siguientes condiciones, evaluadas en orden 
 
 4. **Filtrado de vuelos**: Verificar que solo se muestran vuelos futuros, no vuelos con fecha pasada
 
----
-
 ## 7. Códigos de Error HTTP
 
 ### Errores de Validación (400 Bad Request)
@@ -338,8 +313,6 @@ Los descuentos se aplican según las siguientes condiciones, evaluadas en orden 
 
 ### Errores del Servidor (500 Internal Server Error)
 - Errores inesperados del sistema
-
----
 
 ## 8. Notas Adicionales
 

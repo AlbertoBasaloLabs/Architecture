@@ -8,12 +8,10 @@ La arquitectura actual es **intencionalmente deficiente** para propósitos educa
 
 **Características principales**:
 - Gestión de cohetes, vuelos y reservas
+- Control de capacidad y estados de vuelos
+- Cancelación automática de vuelos con devoluciones
 - Procesamiento de pagos simulado (gateway externo)
 - Notificaciones por email simuladas
-- Cancelación automática de vuelos con devoluciones
-- Control de capacidad y estados de vuelos
-
----
 
 ## Tecnologías
 
@@ -24,7 +22,6 @@ La arquitectura actual es **intencionalmente deficiente** para propósitos educa
 - **Database**: In-memory (HashMap)
 - **External Services**: Simulated (console logs)
 
----
 
 ## Endpoints
 
@@ -38,7 +35,6 @@ La arquitectura actual es **intencionalmente deficiente** para propósitos educa
 | POST | `/bookings` | Create booking (processes payment) |
 | POST | `/admin/cancel-flights` | Trigger cancellation check |
 
----
 
 ## Estructura de Carpetas
 
@@ -60,8 +56,6 @@ java/
 - **business**: Services (Flight, Booking, Cancellation) + Gateways (Payment, Notification)
 - **persistence**: Repositories in-memory (Rocket, Flight, Booking)
 - **model**: Entidades (Rocket, Flight, Booking, FlightStatus)
-
----
 
 ## Flujo de Datos
 
@@ -103,7 +97,6 @@ Application Layer
                       └─ Booking (refunded via paymentTransactionId)
 ```
 
----
 
 ## Ejecución
 
@@ -112,7 +105,7 @@ Application Layer
 mvn clean package
 
 # Ejecutar
-java -jar target/astrobookings-legacy-1.0-SNAPSHOT.jar
+java -jar target/astrobookings-1.0-SNAPSHOT.jar
 
 # Server: http://localhost:8080
 ```
@@ -200,8 +193,8 @@ graph TB
     BR --> BOOKING
     FLIGHT --> STATUS
     
-    style PG fill:#f9f,stroke:#333
-    style NS fill:#f9f,stroke:#333
+    style PG fill:#00ccff,stroke:#333
+    style NS fill:#00ccff,stroke:#333
     style PAYMENT fill:#ddd,stroke:#333,stroke-dasharray: 5 5
     style EMAIL fill:#ddd,stroke:#333,stroke-dasharray: 5 5
 ```
@@ -209,7 +202,7 @@ graph TB
 **Leyenda**:
 - **Líneas sólidas**: Dependencias directas (acoplamiento fuerte)
 - **Líneas punteadas**: Servicios externos simulados
-- **Rosa**: Gateways a servicios externos
+- **Azul**: Gateways a servicios externos
 - **Gris**: Servicios externos (no implementados)
 
 ---

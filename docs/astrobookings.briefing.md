@@ -1,72 +1,46 @@
 # AstroBookings — Briefing
 
-AstroBookings es una aplicación de reservas para viajes espaciales. Gestiona cohetes, vuelos y reservas controlando capacidad, precios y estados de los vuelos. 
+App de reservas para viajes espaciales. Gestiona cohetes, vuelos y reservas con control de capacidad, precios y estados.
 
-## Objetivo del sistema
-- Permitir reservar viajes espaciales de forma simple.  
-- Garantizar reglas de negocio de capacidad y estados.  
-- Aplicar descuentos automáticos según contexto.  
-- Mostrar vuelos futuros y gestionar reservas asociadas.  
-- Notificar por a los usuarios cuando un vuelo se confirme o cancele.  
-- Procesar pagos mediante gateway de pagos y gestionar devoluciones.
+## Objetivo
+- Ofrecer vuelos en cohetes
+- Reservar viajes para un pasajero
+- Controlar capacidad, descuentos y estados
+- Notificar confirmación/cancelación
+- Procesar pagos y devoluciones
 
-## Entidades principales
+## Entidades
 
-### Rocket
-- Nave espacial que transporta pasajeros.  
-- Tiene nombre (obligatorio), capacidad (máx. 10), velocidad (opcional).  
+- `Rocket`
+    - Nombre (obligatorio), capacidad (máx. 10), velocidad (opcional)
 
-### Flight
-- Viaje espacial programado con un cohete.  
-- Tiene fecha futura, precio base, mínimo de pasajeros (5 por defecto).  
-- Estados: `SCHEDULED`, `CONFIRMED`, `SOLD_OUT`, `CANCELLED`.  
-- Validaciones de fecha y precio.  
-- Cambio automático de estado según reservas.  
+- `Flight`
+    - Fecha futura, precio base, mínimo pasajeros (5 default)
+    - Estados: `SCHEDULED`, `CONFIRMED`, `SOLD_OUT`, `CANCELLED`
+    - Cambio automático según reservas
 
-### Booking
-- Reserva de un pasajero en un vuelo.  
-- Incluye nombre del pasajero y precio final.  
-- Solo se permite reservar si el vuelo no está lleno o cancelado.  
+- `Booking`
+    - Pasajero + precio final
+    - Solo si vuelo no lleno ni cancelado
 
-## Lógica clave
+## Lógica
 
-### Capacidad
-- Un vuelo no puede superar la capacidad del cohete.  
-- Al llegar al límite → estado `SOLD_OUT`.  
+- No superar capacidad cohete → `SOLD_OUT` al límite
+- Alcanza mínimo pasajeros → `CONFIRMED` + notificar
+- Falta 1 semana sin mínimo → `CANCELLED` + notificar + devolver pago
 
-### Confirmación automática
-- Si un vuelo alcanza el mínimo de pasajeros → `CONFIRMED`.  
-- Notificar a los pasajeros.
+- Descuentos (precedencia, solo uno)
+    1. Última plaza → 0%
+    2. Falta 1 para mínimo → 30%
+    3. Más 6 meses antes → 10%
+    4. Entre 1 mes y 1 semana → 20%
+    5. Resto → 0%
 
-### Cancelación automática
-- Si falta 1 semana y no se llegó al mínimo → `CANCELLED`.  
-- Notificar a los pasajeros.  
-- Procesar devolución del pago mediante gateway de pagos.
+## Funcionalidades
 
-### Política de descuentos
-Reglas aplicadas en orden de precedencia (solo una por reserva):  
-1. Última plaza → 0%  
-2. Falta 1 para el mínimo → 30%  
-3. Más de 6 meses antes → 10%  
-4. Entre 1 mes y 1 semana → 20%  
-5. Resto → 0%  
-
-## Funcionalidades principales
-
-#### Gestión de Rockets
-- Listar cohetes.  
-- Crear cohetes con nombre y capacidad válida.  
-
-### Gestión de Flights
-- Listar vuelos futuros (filtro por estado).  
-- Crear vuelos con fecha futura y precio > 0 con estado `SCHEDULED`.  
-
-### Gestión de Bookings
-- Crear reservas en vuelos válidos calculando precio con descuentos.  
-- Procesar pago mediante gateway de pagos tras crear la reserva.  
-- Consultar reservas por vuelo o pasajero.
-
-### Integración con Gateway de Pagos
-- Procesar pago al crear una reserva.  
-- Procesar devolución cuando un vuelo se cancela.  
-
+- Listar y crear `Rocket` con validación
+- Listar `Flight` futuros (filtro estado)
+- Crear `Flight` con fecha futura y precio > 0 → `SCHEDULED`
+- Crear `Booking` con descuentos + procesar pago
+- Consultar `Booking` por vuelo/pasajero
+- Cancelar `Flight` → `CANCELLED` + notificar + devolver pago

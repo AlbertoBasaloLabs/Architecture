@@ -22,6 +22,6 @@ public class AstroBookingsApp {
         server.setExecutor(null); // creates a default executor
         server.start();
 
-        System.out.println("Server started on port " + port);
+        System.out.println("AstroBookings started on port " + port);
     }
 }
