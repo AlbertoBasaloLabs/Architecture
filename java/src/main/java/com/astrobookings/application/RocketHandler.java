@@ -35,7 +35,7 @@ public class RocketHandler extends BaseHandler implements HttpHandler {
         try {
             InputStream is = exchange.getRequestBody();
             Rocket rocket = objectMapper.readValue(is, Rocket.class);
-            if(rocket.getCapacity() == null || rocket.getCapacity() <= 0) {
+            if( rocket.getCapacity() <= 0) {
                 throw new IllegalArgumentException("Capacity must be greater than 0");
             }
             rocket.setId(UUID.randomUUID().toString());
