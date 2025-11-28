@@ -8,9 +8,9 @@ Señales de decadencia: problemas reales de la arquitectura por capas
 
 - ¿Qué impacto tiene las decisiones de diseño?
 
-### Objetivo conceptual:
+- ¿Qué se entiende por **responsabilidad** única?
 
-Entender el principal valor de la arquitectura por capas y los problemas que se presentan.
+> Objetivo: entender el principal valor de la arquitectura por capas y los problemas que se presentan.
 
 ## 2. CONCEPT 
 
@@ -42,7 +42,7 @@ Corregir los problemas de **responsabilidad** que se encuentran en el código.
   - [ ] Definir excepciones de negocio.
   - [ ] Centralizar respuestas de error.
 
-Objetivo: familiarizarse con el código y sus deficiencias actuales
+> Objetivo: familiarizarse con el código y sus deficiencias actuales
 
 ## 4. CONCLUSIONS
 
