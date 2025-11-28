@@ -1,4 +1,4 @@
-# 1 Layered Architecture 
+# 1 Layered Responsibility 
 
 Señales de decadencia: problemas reales de la arquitectura por capas
 
@@ -9,7 +9,8 @@ Señales de decadencia: problemas reales de la arquitectura por capas
 - ¿Qué impacto tiene las decisiones de diseño?
 
 ### Objetivo conceptual:
-Entender por qué el enfoque por capas tiende a degradarse y preparar el terreno para alternativas como Hexagonal y Clean Architecture.
+
+Entender el principal valor de la arquitectura por capas y los problemas que se presentan.
 
 ## 2. CONCEPT 
 
@@ -17,7 +18,7 @@ Entender por qué el enfoque por capas tiende a degradarse y preparar el terreno
 
 - Sencillez.
 - Organización.
-- Separación de responsabilidades.
+- Separación de **responsabilidades**.
 
 ### Problemas típicos de una arquitectura por capas:
 
@@ -29,14 +30,17 @@ Entender por qué el enfoque por capas tiende a degradarse y preparar el terreno
 - Potencialmente un _Big Ball of Mud_.
 
 ## 3. CONCRETE PRACTICE 
-Comenzar con un diseño de capas intencionalmente deficiente.
+Partimos de un diseño de capas intencionalmente deficiente.
 
-Señalar mediante comentarios `To Do:` los problemas que se encuentran en el código.
-- [ ] Las reglas de validación y de negocio están dispersas.
-- [ ] Llamadas a repositorio en el controlador.
-- [ ] Acoplamientos por constructores de instancias.
-- [ ] Las excepciones no siguen una estructura consistente.
-- [ ] No hay una responsabilidad clara por capa.
+Corregir los problemas de **responsabilidad** que se encuentran en el código.
+
+- Las reglas de validación de estructura y negocio están dispersas.
+  - [ ] Usar DTOs de entrada para validar estructura.
+  - [ ] Llevar validación de valores a nivel de negocio.
+  - [ ] Evitar llamadas a repositorio desde el controlador.
+- Las excepciones no siguen una estructura consistente.
+  - [ ] Definir excepciones de negocio.
+  - [ ] Centralizar respuestas de error.
 
 Objetivo: familiarizarse con el código y sus deficiencias actuales
 
