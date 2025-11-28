@@ -1,4 +1,8 @@
-package com.astrobookings.providers;
+package com.astrobookings.infra.adapters.persistence;
+
+import com.astrobookings.business.ports.out.BookingRepository;
+import com.astrobookings.business.ports.out.FlightRepository;
+import com.astrobookings.business.ports.out.RocketRepository;
 
 public class RepositoryFactory {
     private static final BookingRepository bookingRepository = new InMemoryBookingRepository();

@@ -5,14 +5,14 @@ import java.io.InputStream;
 import java.util.List;
 
 import com.astrobookings.business.RocketService;
-import com.astrobookings.business.ServiceFactory;
+import com.astrobookings.business.domain.Rocket;
 import com.astrobookings.business.models.CreateRocketRequest;
-import com.astrobookings.providers.models.Rocket;
+import com.astrobookings.config.AppConfig;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 public class RocketHandler extends BaseHandler implements HttpHandler {
-  private RocketService rocketService = ServiceFactory.getRocketService();
+  private RocketService rocketService = AppConfig.getRocketService();
 
   @Override
   public void handle(HttpExchange exchange) throws IOException {

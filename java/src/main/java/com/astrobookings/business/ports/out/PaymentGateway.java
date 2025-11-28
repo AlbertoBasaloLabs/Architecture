@@ -1,4 +1,4 @@
-package com.astrobookings.business;
+package com.astrobookings.business.ports.out;
 
 public interface PaymentGateway {
     String processPayment(String bookingId, double amount);

@@ -3,14 +3,17 @@ package com.astrobookings.business;
 import java.util.List;
 import java.util.UUID;
 
+import com.astrobookings.business.domain.Rocket;
 import com.astrobookings.business.exceptions.ValidationException;
 import com.astrobookings.business.models.CreateRocketRequest;
-import com.astrobookings.providers.RepositoryFactory;
-import com.astrobookings.providers.RocketRepository;
-import com.astrobookings.providers.models.Rocket;
+import com.astrobookings.business.ports.out.RocketRepository;
 
 class RocketServiceImpl implements RocketService {
-  private RocketRepository rocketRepository = RepositoryFactory.getRocketRepository();
+  private final RocketRepository rocketRepository;
+
+  public RocketServiceImpl(RocketRepository rocketRepository) {
+    this.rocketRepository = rocketRepository;
+  }
 
   @Override
   public List<Rocket> findAllRockets() {

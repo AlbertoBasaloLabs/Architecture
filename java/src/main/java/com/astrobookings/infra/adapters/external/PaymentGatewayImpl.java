@@ -1,6 +1,8 @@
-package com.astrobookings.business;
+package com.astrobookings.infra.adapters.external;
 
 import java.util.UUID;
+
+import com.astrobookings.business.ports.out.PaymentGateway;
 
 class PaymentGatewayImpl implements PaymentGateway {
     

@@ -1,8 +1,9 @@
-package com.astrobookings.business;
+package com.astrobookings.infra.adapters.external;
 
 import java.util.List;
 
-import com.astrobookings.providers.models.Booking;
+import com.astrobookings.business.domain.Booking;
+import com.astrobookings.business.ports.out.NotificationService;
 
 class NotificationServiceImpl implements NotificationService {
 

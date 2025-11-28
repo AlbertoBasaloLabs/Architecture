@@ -1,9 +1,9 @@
-package com.astrobookings.providers;
+package com.astrobookings.business.ports.out;
 
 import java.util.List;
 import java.util.Optional;
 
-import com.astrobookings.providers.models.Flight;
+import com.astrobookings.business.domain.Flight;
 
 public interface FlightRepository {
     Flight save(Flight flight);

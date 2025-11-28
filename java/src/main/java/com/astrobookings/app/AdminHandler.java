@@ -1,7 +1,7 @@
 package com.astrobookings.app;
 
 import com.astrobookings.business.FlightCancellationService;
-import com.astrobookings.business.ServiceFactory;
+import com.astrobookings.config.AppConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -16,7 +16,7 @@ import java.util.Map;
  * This is an intentionally "dirty" implementation with direct service instantiation.
  */
 public class AdminHandler extends BaseHandler implements HttpHandler {
-    private FlightCancellationService cancellationService = ServiceFactory.getFlightCancellationService();
+    private FlightCancellationService cancellationService = AppConfig.getFlightCancellationService();
     private ObjectMapper objectMapper = new ObjectMapper();
     
     @Override

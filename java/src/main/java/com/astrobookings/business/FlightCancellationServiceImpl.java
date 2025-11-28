@@ -4,18 +4,26 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import com.astrobookings.providers.BookingRepository;
-import com.astrobookings.providers.FlightRepository;
-import com.astrobookings.providers.RepositoryFactory;
-import com.astrobookings.providers.models.Booking;
-import com.astrobookings.providers.models.Flight;
-import com.astrobookings.providers.models.FlightStatus;
+import com.astrobookings.business.domain.Booking;
+import com.astrobookings.business.domain.Flight;
+import com.astrobookings.business.domain.FlightStatus;
+import com.astrobookings.business.ports.out.BookingRepository;
+import com.astrobookings.business.ports.out.FlightRepository;
+import com.astrobookings.business.ports.out.NotificationService;
+import com.astrobookings.business.ports.out.PaymentGateway;
 
 class FlightCancellationServiceImpl implements FlightCancellationService {
-  private FlightRepository flightRepository = RepositoryFactory.getFlightRepository();
-  private BookingRepository bookingRepository = RepositoryFactory.getBookingRepository();
-  private PaymentGateway paymentGateway = ServiceFactory.getPaymentGateway();
-  private NotificationService notificationService = ServiceFactory.getNotificationService();
+  private final FlightRepository flightRepository;
+  private final BookingRepository bookingRepository;
+  private final PaymentGateway paymentGateway;
+  private final NotificationService notificationService;
+
+  public FlightCancellationServiceImpl(FlightRepository flightRepository, BookingRepository bookingRepository, PaymentGateway paymentGateway, NotificationService notificationService) {
+    this.flightRepository = flightRepository;
+    this.bookingRepository = bookingRepository;
+    this.paymentGateway = paymentGateway;
+    this.notificationService = notificationService;
+  }
 
   private static final int CANCELLATION_THRESHOLD_DAYS = 7;
 
@@ -32,9 +40,6 @@ class FlightCancellationServiceImpl implements FlightCancellationService {
         continue;
       }
 
-      if (flight.getDepartureDate().isAfter(cancellationThreshold)) {
-        continue;
-      }
       if (flight.getDepartureDate().isAfter(cancellationThreshold)) {
         continue;
       }

@@ -1,4 +1,4 @@
-package com.astrobookings.providers;
+package com.astrobookings.infra.adapters.persistence;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.astrobookings.providers.models.Booking;
+import com.astrobookings.business.domain.Booking;
+import com.astrobookings.business.ports.out.BookingRepository;
 
 class InMemoryBookingRepository implements BookingRepository {
   private static final Map<String, Booking> db = new HashMap<>();

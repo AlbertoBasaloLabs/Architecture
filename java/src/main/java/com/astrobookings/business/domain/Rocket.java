@@ -1,4 +1,4 @@
-package com.astrobookings.providers.models;
+package com.astrobookings.business.domain;
 
 public class Rocket {
   private String id;

@@ -7,14 +7,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.astrobookings.business.BookingService;
-import com.astrobookings.business.ServiceFactory;
+import com.astrobookings.business.domain.Booking;
 import com.astrobookings.business.models.CreateBookingRequest;
-import com.astrobookings.providers.models.Booking;
+import com.astrobookings.config.AppConfig;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 public class BookingHandler extends BaseHandler implements HttpHandler {
-  private BookingService bookingService = ServiceFactory.getBookingService();
+  private BookingService bookingService = AppConfig.getBookingService();
 
   @Override
   public void handle(HttpExchange exchange) throws IOException {

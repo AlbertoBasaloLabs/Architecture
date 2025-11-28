@@ -5,25 +5,34 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
+import com.astrobookings.business.domain.Booking;
+import com.astrobookings.business.domain.Flight;
+import com.astrobookings.business.domain.FlightStatus;
+import com.astrobookings.business.domain.Rocket;
 import com.astrobookings.business.exceptions.NotFoundException;
 import com.astrobookings.business.exceptions.PaymentException;
 import com.astrobookings.business.exceptions.ValidationException;
 import com.astrobookings.business.models.CreateBookingRequest;
-import com.astrobookings.providers.BookingRepository;
-import com.astrobookings.providers.FlightRepository;
-import com.astrobookings.providers.RepositoryFactory;
-import com.astrobookings.providers.RocketRepository;
-import com.astrobookings.providers.models.Booking;
-import com.astrobookings.providers.models.Flight;
-import com.astrobookings.providers.models.FlightStatus;
-import com.astrobookings.providers.models.Rocket;
+import com.astrobookings.business.ports.out.BookingRepository;
+import com.astrobookings.business.ports.out.FlightRepository;
+import com.astrobookings.business.ports.out.NotificationService;
+import com.astrobookings.business.ports.out.PaymentGateway;
+import com.astrobookings.business.ports.out.RocketRepository;
 
 class BookingServiceImpl implements BookingService {
-  private FlightRepository flightRepository = RepositoryFactory.getFlightRepository();
-  private RocketRepository rocketRepository = RepositoryFactory.getRocketRepository();
-  private BookingRepository bookingRepository = RepositoryFactory.getBookingRepository();
-  private PaymentGateway paymentGateway = ServiceFactory.getPaymentGateway();
-  private NotificationService notificationService = ServiceFactory.getNotificationService();
+  private final FlightRepository flightRepository;
+  private final RocketRepository rocketRepository;
+  private final BookingRepository bookingRepository;
+  private final PaymentGateway paymentGateway;
+  private final NotificationService notificationService;
+
+  public BookingServiceImpl(BookingRepository bookingRepository, FlightRepository flightRepository, RocketRepository rocketRepository, PaymentGateway paymentGateway, NotificationService notificationService) {
+    this.bookingRepository = bookingRepository;
+    this.flightRepository = flightRepository;
+    this.rocketRepository = rocketRepository;
+    this.paymentGateway = paymentGateway;
+    this.notificationService = notificationService;
+  }
 
   @Override
   public Booking createBooking(CreateBookingRequest request) {

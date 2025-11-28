@@ -5,18 +5,22 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.astrobookings.business.domain.Flight;
+import com.astrobookings.business.domain.FlightStatus;
 import com.astrobookings.business.exceptions.NotFoundException;
 import com.astrobookings.business.exceptions.ValidationException;
 import com.astrobookings.business.models.CreateFlightRequest;
-import com.astrobookings.providers.FlightRepository;
-import com.astrobookings.providers.RepositoryFactory;
-import com.astrobookings.providers.RocketRepository;
-import com.astrobookings.providers.models.Flight;
-import com.astrobookings.providers.models.FlightStatus;
+import com.astrobookings.business.ports.out.FlightRepository;
+import com.astrobookings.business.ports.out.RocketRepository;
 
 class FlightServiceImpl implements FlightService {
-  private FlightRepository flightRepository = RepositoryFactory.getFlightRepository();
-  private RocketRepository rocketRepository = RepositoryFactory.getRocketRepository();
+  private final FlightRepository flightRepository;
+  private final RocketRepository rocketRepository;
+
+  public FlightServiceImpl(FlightRepository flightRepository, RocketRepository rocketRepository) {
+    this.flightRepository = flightRepository;
+    this.rocketRepository = rocketRepository;
+  }
 
   @Override
   public List<Flight> getAvailableFlights() {

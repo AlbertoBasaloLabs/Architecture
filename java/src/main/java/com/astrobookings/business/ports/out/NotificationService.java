@@ -1,8 +1,8 @@
-package com.astrobookings.business;
+package com.astrobookings.business.ports.out;
 
 import java.util.List;
 
-import com.astrobookings.providers.models.Booking;
+import com.astrobookings.business.domain.Booking;
 
 public interface NotificationService {
     void notifyFlightConfirmed(String flightId, List<Booking> bookings);

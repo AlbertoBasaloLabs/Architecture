@@ -1,4 +1,4 @@
-package com.astrobookings.providers.models;
+package com.astrobookings.business.domain;
 
 public enum FlightStatus {
   SCHEDULED,
