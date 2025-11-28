@@ -42,15 +42,15 @@ java/
 │   ├── business/       # Services, Models & Exceptions (Business Layer)
 │   │   ├── exceptions/ # Custom business exceptions
 │   │   ├── models/     # Request models (anemic records)
-│   │   └── *Service    # Business logic services
+│   │   ├── *Service.java       # Service Interfaces
+│   │   ├── *ServiceImpl.java   # Service Implementations (package-private)
+│   │   └── ServiceFactory.java # Factory for Services
 │   ├── providers/      # Repositories & Domain Models (Data Layer)
 │   │   ├── models/     # Domain entities
-│   │   └── *Repository # Data access
+│   │   ├── *Repository.java        # Repository Interfaces
+│   │   ├── InMemory*Repository.java # Repository Implementations (package-private)
+│   │   └── RepositoryFactory.java  # Factory for Repositories
 │   └── AstroBookingsApp.java
-│
-├── pom.xml
-├── README.md
-└── ARCHITECTURE.md
 ```
 
 **Capas**:
@@ -112,11 +112,39 @@ Reemplazo de excepciones genéricas por excepciones específicas de negocio:
 - `IllegalArgumentException` (validación de estructura) → 400
 - Otros → 500
 
-### Eliminación de Acceso Directo a Repositorios
+### Inversión de Dependencias y Factorías
 
-- **Antes**: `RocketHandler` accedía directamente a `RocketRepository`
-- **Ahora**: `RocketHandler` → `RocketService` → `RocketRepository`
-- Toda la lógica de negocio está en la capa de servicios
+Se ha implementado un patrón de **Inversión de Dependencias** manual para desacoplar las capas y mejorar la mantenibilidad.
+
+#### 1. Interfaces (Contratos)
+Cada componente de negocio y persistencia define su contrato a través de una interfaz pública:
+- `BookingService`, `FlightService`, `RocketService`
+- `BookingRepository`, `FlightRepository`, `RocketRepository`
+
+#### 2. Implementaciones Ocultas
+Las implementaciones concretas son **package-private** (sin modificador de acceso público) para impedir su instanciación directa desde otras capas:
+- `BookingServiceImpl`, `InMemoryBookingRepository`, etc.
+- Esto obliga a los consumidores a depender únicamente de las interfaces.
+
+#### 3. Factorías Estáticas
+Se utilizan factorías para proveer las instancias, actuando como un contenedor de inyección de dependencias simple:
+
+- **`ServiceFactory`**: Punto de acceso único para la capa de Aplicación (`app`).
+  ```java
+  // En BookingHandler.java
+  private BookingService bookingService = ServiceFactory.getBookingService();
+  ```
+
+- **`RepositoryFactory`**: Punto de acceso único para la capa de Negocio (`business`).
+  ```java
+  // En BookingServiceImpl.java
+  private BookingRepository bookingRepository = RepositoryFactory.getBookingRepository();
+  ```
+
+Este diseño permite:
+- **Desacoplamiento**: Las capas superiores no conocen los detalles de implementación de las inferiores.
+- **Testabilidad**: Facilita la creación de mocks para tests unitarios (aunque en esta fase usamos implementaciones en memoria).
+- **Flexibilidad**: Cambiar de `InMemoryRepository` a `SqlRepository` solo requiere cambiar la factoría, sin tocar los servicios.
 
 ## Flujo de Datos
 
@@ -308,5 +336,3 @@ graph TB
 - **Rosa**: Excepciones personalizadas
 - **Amarillo**: RocketService (añadido para eliminar acceso directo a repositorio)
 - **Gris**: Servicios externos (no implementados)
-
----
