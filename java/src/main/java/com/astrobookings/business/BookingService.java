@@ -5,6 +5,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
+import com.astrobookings.business.exceptions.NotFoundException;
+import com.astrobookings.business.exceptions.PaymentException;
+import com.astrobookings.business.exceptions.ValidationException;
+import com.astrobookings.business.models.CreateBookingRequest;
 import com.astrobookings.providers.BookingRepository;
 import com.astrobookings.providers.FlightRepository;
 import com.astrobookings.providers.RocketRepository;
@@ -20,25 +24,23 @@ public class BookingService {
   private PaymentGateway paymentGateway = new PaymentGateway();
   private NotificationService notificationService = new NotificationService();
 
-  public Booking createBooking(String flightId, String passengerName) {
-    if (passengerName == null || passengerName.isEmpty()) {
-      throw new IllegalArgumentException("Passenger name is required");
-    }
-    if (flightId == null || flightId.isEmpty()) {
-      throw new IllegalArgumentException("Flight id is required");
-    }
+  public Booking createBooking(CreateBookingRequest request) {
+    String flightId = request.flightId();
+    String passengerName = request.passengerName();
+
+    // Business validations
     Flight flight = flightRepository.findById(flightId)
-        .orElseThrow(() -> new RuntimeException("Flight not found"));
+        .orElseThrow(() -> new NotFoundException("Flight not found"));
 
     if (flight.getStatus() == FlightStatus.SOLD_OUT || flight.getStatus() == FlightStatus.CANCELLED) {
-      throw new RuntimeException("Cannot book this flight. Status is " + flight.getStatus());
+      throw new ValidationException("Cannot book this flight. Status is " + flight.getStatus());
     }
     Rocket rocket = rocketRepository.findById(flight.getRocketId())
-        .orElseThrow(() -> new RuntimeException("Rocket not found"));
+        .orElseThrow(() -> new NotFoundException("Rocket not found"));
 
     List<Booking> bookings = bookingRepository.findByFlightId(flightId);
     if (bookings.size() >= rocket.getCapacity()) {
-      throw new RuntimeException("Flight is full");
+      throw new ValidationException("Flight is full");
     }
     double price = flight.getBasePrice();
     long daysUntilDeparture = ChronoUnit.DAYS.between(LocalDateTime.now(), flight.getDepartureDate());
@@ -54,7 +56,7 @@ public class BookingService {
     try {
       transactionId = paymentGateway.processPayment(bookingId, price);
     } catch (RuntimeException e) {
-      throw new RuntimeException("Payment failed: " + e.getMessage());
+      throw new PaymentException("Payment failed: " + e.getMessage());
     }
 
     Booking booking = new Booking(
@@ -95,3 +97,4 @@ public class BookingService {
     return bookingRepository.findAll();
   }
 }
+

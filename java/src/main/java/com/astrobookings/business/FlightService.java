@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.astrobookings.business.exceptions.NotFoundException;
+import com.astrobookings.business.exceptions.ValidationException;
+import com.astrobookings.business.models.CreateFlightRequest;
 import com.astrobookings.providers.FlightRepository;
 import com.astrobookings.providers.RocketRepository;
 import com.astrobookings.providers.models.Flight;
@@ -34,23 +37,34 @@ public class FlightService {
         .collect(Collectors.toList());
   }
 
-  public Flight createFlight(String rocketId, LocalDateTime departureDate, Double basePrice) {
-    if (rocketId == null || rocketId.trim().isEmpty()) {
-      throw new IllegalArgumentException("Rocket id must be provided");
+  public Flight createFlight(CreateFlightRequest request) {
+    String rocketId = request.rocketId();
+    String departureDateStr = request.departureDate();
+    Double basePrice = request.basePrice();
+
+    // Parse date (structure validation)
+    LocalDateTime departureDate;
+    try {
+      departureDate = LocalDateTime.parse(departureDateStr);
+    } catch (Exception e) {
+      throw new ValidationException("Invalid departure date format");
     }
+
+    // Business validations
     if (rocketRepository.findById(rocketId).isEmpty()) {
-      throw new IllegalArgumentException("Rocket with id " + rocketId + " does not exist");
+      throw new NotFoundException("Rocket with id " + rocketId + " does not exist");
     }
     if (basePrice <= 0) {
-      throw new IllegalArgumentException("Base price must be positive");
+      throw new ValidationException("Base price must be positive");
     }
     if (departureDate.isBefore(LocalDateTime.now())) {
-      throw new IllegalArgumentException("Departure date must be in the future");
+      throw new ValidationException("Departure date must be in the future");
     }
     LocalDateTime oneYearFromNow = LocalDateTime.now().plusYears(1);
     if (departureDate.isAfter(oneYearFromNow)) {
-      throw new IllegalArgumentException("Departure date cannot be more than 1 year ahead");
+      throw new ValidationException("Departure date cannot be more than 1 year ahead");
     }
+
     String id = UUID.randomUUID().toString();
     int MIN_PASSENGERS = 5;
     FlightStatus INITIAL_STATUS = FlightStatus.SCHEDULED;

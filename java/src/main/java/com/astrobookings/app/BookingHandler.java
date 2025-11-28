@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.astrobookings.business.BookingService;
+import com.astrobookings.business.models.CreateBookingRequest;
 import com.astrobookings.providers.models.Booking;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -44,26 +45,26 @@ public class BookingHandler extends BaseHandler implements HttpHandler {
   private void handlePost(HttpExchange exchange) throws IOException {
     try {
       InputStream is = exchange.getRequestBody();
-      Map<String, String> body = objectMapper.readValue(is, Map.class);
-
-      String flightId = body.get("flightId");
-      String passengerName = body.get("passengerName");
-      Booking booking = bookingService.createBooking(flightId, passengerName);
+      CreateBookingRequest request = objectMapper.readValue(is, CreateBookingRequest.class);
+      
+      // Validate structure at application layer
+      validateBookingRequest(request);
+      
+      // Delegate to business layer
+      Booking booking = bookingService.createBooking(request);
+      
       sendJsonResponse(exchange, 201, booking);
-
-    } catch (IllegalArgumentException e) {
-      handleError(exchange, 400, e.getMessage());
-    } catch (RuntimeException e) {
-      if (e.getMessage() != null && e.getMessage().toLowerCase().contains("payment failed")) {
-        handleError(exchange, 402, e.getMessage());
-      } else if (e.getMessage() != null && e.getMessage().toLowerCase().contains("not found")) {
-        handleError(exchange, 404, e.getMessage());
-      } else {
-        handleError(exchange, 400, e.getMessage());
-      }
     } catch (Exception e) {
-      e.printStackTrace();
-      handleError(exchange, 500, "Internal server error");
+      handleBusinessException(exchange, e);
+    }
+  }
+
+  private void validateBookingRequest(CreateBookingRequest request) {
+    if (request.flightId() == null || request.flightId().trim().isEmpty()) {
+      throw new IllegalArgumentException("Flight id is required");
+    }
+    if (request.passengerName() == null || request.passengerName().trim().isEmpty()) {
+      throw new IllegalArgumentException("Passenger name is required");
     }
   }
 

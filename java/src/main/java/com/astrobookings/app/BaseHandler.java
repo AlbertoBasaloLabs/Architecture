@@ -63,6 +63,29 @@ public abstract class BaseHandler {
     }
 
     /**
+     * Handle business exceptions and send appropriate HTTP responses.
+     * @param exchange The HTTP exchange to send the response to.
+     * @param e The exception to handle.
+     * @throws IOException If an I/O error occurs.
+     */
+    protected void handleBusinessException(HttpExchange exchange, Exception e) throws IOException {
+        if (e instanceof com.astrobookings.business.exceptions.ValidationException) {
+            handleError(exchange, 400, e.getMessage());
+        } else if (e instanceof com.astrobookings.business.exceptions.NotFoundException) {
+            handleError(exchange, 404, e.getMessage());
+        } else if (e instanceof com.astrobookings.business.exceptions.PaymentException) {
+            handleError(exchange, 402, e.getMessage());
+        } else if (e instanceof IllegalArgumentException) {
+            // DTOs throw IllegalArgumentException for structure validation
+            handleError(exchange, 400, e.getMessage());
+        } else {
+            e.printStackTrace();
+            handleError(exchange, 500, "Internal server error");
+        }
+    }
+
+
+    /**
      * Send a plain text response (for simple responses without JSON).
      * @param exchange The HTTP exchange to send the response to.
      * @param statusCode The status code to send.

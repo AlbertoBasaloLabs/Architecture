@@ -2,12 +2,10 @@ package com.astrobookings.app;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Map;
 
 import com.astrobookings.business.FlightService;
+import com.astrobookings.business.models.CreateFlightRequest;
 import com.astrobookings.providers.models.Flight;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -37,54 +35,29 @@ public class FlightHandler extends BaseHandler implements HttpHandler {
   private void handlePost(HttpExchange exchange) throws IOException {
     try {
       InputStream inputStream = exchange.getRequestBody();
-      Map<String, Object> body = objectMapper.readValue(inputStream, Map.class);
-      String rocketId = (String) body.get("rocketId");
-      String dateStr = (String) body.get("departureDate");
-      Object basePriceObj = body.get("basePrice");
-      validateFlightInput(rocketId, dateStr, basePriceObj);
-      double basePrice = parseNumber(basePriceObj, "Invalid base price format");
-      LocalDateTime departureDate = parseDate(dateStr, "Invalid departure date format");
-      Flight flight = flightService.createFlight(rocketId, departureDate, basePrice);
+      CreateFlightRequest request = objectMapper.readValue(inputStream, CreateFlightRequest.class);
+      
+      // Validate structure at application layer
+      validateFlightRequest(request);
+      
+      // Delegate to business layer
+      Flight flight = flightService.createFlight(request);
+      
       sendJsonResponse(exchange, 201, flight);
-    } catch (IllegalArgumentException e) {
-      if (e.getMessage() != null && e.getMessage().contains("does not exist")) {
-        handleError(exchange, 404, e.getMessage());
-      } else {
-        handleError(exchange, 400, e.getMessage());
-      }
     } catch (Exception e) {
-      e.printStackTrace();
-      exchange.sendResponseHeaders(500, -1);
+      handleBusinessException(exchange, e);
     }
   }
 
-  private void validateFlightInput(String rocketId, String dateStr, Object basePriceObj) {
-    if (rocketId == null || rocketId.trim().isEmpty()) {
+  private void validateFlightRequest(CreateFlightRequest request) {
+    if (request.rocketId() == null || request.rocketId().trim().isEmpty()) {
       throw new IllegalArgumentException("Rocket id must be provided");
     }
-    if (dateStr == null || dateStr.trim().isEmpty()) {
+    if (request.departureDate() == null || request.departureDate().trim().isEmpty()) {
       throw new IllegalArgumentException("Departure date must be provided");
     }
-    if (basePriceObj == null || !(basePriceObj instanceof Number)) {
+    if (request.basePrice() == null) {
       throw new IllegalArgumentException("Base price must be provided");
-    }
-  }
-
-  private double parseNumber(Object obj, String errorMessage) {
-    if (obj == null) {
-      throw new IllegalArgumentException(errorMessage);
-    }
-    if (!(obj instanceof Number)) {
-      throw new IllegalArgumentException(errorMessage);
-    }
-    return ((Number) obj).doubleValue();
-  }
-
-  private LocalDateTime parseDate(String dateStr, String errorMessage) {
-    try {
-      return LocalDateTime.parse(dateStr);
-    } catch (DateTimeParseException e) {
-      throw new IllegalArgumentException(errorMessage);
     }
   }
 
