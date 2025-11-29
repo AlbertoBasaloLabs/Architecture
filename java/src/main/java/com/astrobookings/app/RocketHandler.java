@@ -34,13 +34,8 @@ public class RocketHandler extends BaseHandler implements HttpHandler {
     try {
       InputStream is = exchange.getRequestBody();
       CreateRocketRequest request = objectMapper.readValue(is, CreateRocketRequest.class);
-      
-      // Validate structure at application layer
       validateRocketRequest(request);
-      
-      // Delegate to business layer
       Rocket rocket = rocketService.createRocket(request);
-      
       sendJsonResponse(exchange, 201, rocket);
     } catch (Exception e) {
       handleBusinessException(exchange, e);

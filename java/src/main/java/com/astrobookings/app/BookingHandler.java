@@ -47,13 +47,8 @@ public class BookingHandler extends BaseHandler implements HttpHandler {
     try {
       InputStream is = exchange.getRequestBody();
       CreateBookingRequest request = objectMapper.readValue(is, CreateBookingRequest.class);
-      
-      // Validate structure at application layer
       validateBookingRequest(request);
-      
-      // Delegate to business layer
       Booking booking = bookingService.createBooking(request);
-      
       sendJsonResponse(exchange, 201, booking);
     } catch (Exception e) {
       handleBusinessException(exchange, e);

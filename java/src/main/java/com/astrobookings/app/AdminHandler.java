@@ -11,10 +11,6 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * HTTP Handler for administrative operations.
- * This is an intentionally "dirty" implementation with direct service instantiation.
- */
 public class AdminHandler extends BaseHandler implements HttpHandler {
     private FlightCancellationService cancellationService = AppConfig.getFlightCancellationService();
     private ObjectMapper objectMapper = new ObjectMapper();

@@ -37,13 +37,8 @@ public class FlightHandler extends BaseHandler implements HttpHandler {
     try {
       InputStream inputStream = exchange.getRequestBody();
       CreateFlightRequest request = objectMapper.readValue(inputStream, CreateFlightRequest.class);
-      
-      // Validate structure at application layer
       validateFlightRequest(request);
-      
-      // Delegate to business layer
       Flight flight = flightService.createFlight(request);
-      
       sendJsonResponse(exchange, 201, flight);
     } catch (Exception e) {
       handleBusinessException(exchange, e);
