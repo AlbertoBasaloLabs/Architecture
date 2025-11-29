@@ -26,7 +26,7 @@ La conectividad que cambia la dependencia: puertos y adaptadores
 ### Ideas fundamentales:
 
 - El flujo de dependencias va de fuera (detalles) hacia dentro (dominio).
-- La logica de negocio se encuentra en el núcleo (dominio) y es independiente de los detalles.
+- La lógica de negocio se encuentra en el núcleo (dominio) y es independiente de los detalles.
 
 ## 3. CONCRETE PRACTICE 
 Partimos de un diseño flexible con interfaces y factorías.
@@ -43,7 +43,8 @@ Aplicar el patrón **ports y adapters** en la capa de infraestructura (Driven Ad
     - [ ] La capa de aplicación usa las factorías de infraestructura (Configuración) para obtener adaptadores.
     - [ ] La capa de aplicación envía esos adaptadores a la capa de negocio.
     - [ ] La capa de negocio usa sus ports sin conocer detalles de implementación.
-- No es necesario implmentar Driving ports por el momento
+- No es necesario implementar Driving ports por el momento
+- Renombra la carpeta providers a adapters
 
 > Objetivo: patrón ports y adapters y familiaridad con hexagonal architecture.
 
