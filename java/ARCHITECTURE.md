@@ -22,15 +22,15 @@ AstroBookings es una aplicación de reservas de viajes espaciales implementada c
 
 ## Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/rockets` | List all rockets |
-| POST | `/rockets` | Create rocket |
-| GET | `/flights` | List available flights (filter by status) |
-| POST | `/flights` | Create flight |
-| GET | `/bookings` | List bookings (filter by flight/passenger) |
-| POST | `/bookings` | Create booking (processes payment) |
-| POST | `/admin/cancel-flights` | Trigger cancellation check |
+| Method | Path                    | Description                                |
+| ------ | ----------------------- | ------------------------------------------ |
+| GET    | `/rockets`              | List all rockets                           |
+| POST   | `/rockets`              | Create rocket                              |
+| GET    | `/flights`              | List available flights (filter by status)  |
+| POST   | `/flights`              | Create flight                              |
+| GET    | `/bookings`             | List bookings (filter by flight/passenger) |
+| POST   | `/bookings`             | Create booking (processes payment)         |
+| POST   | `/admin/cancel-flights` | Trigger cancellation check                 |
 
 ## Estructura de Carpetas
 
@@ -46,7 +46,7 @@ java/
 │   │   ├── *Service.java             # Service Interfaces
 │   │   ├── *ServiceImpl.java         # Service Implementations
 │   │   └── ServiceFactory.java
-│   ├── providers/                    # Infrastructure Adapters
+│   ├── adapters/                    # Infrastructure Adapters
 │   │   ├── InMemory*Repository.java  # Repository Implementations
 │   │   ├── *Impl.java                # Gateway Implementations (Payment, Notification)
 │   │   ├── RepositoryFactory.java
@@ -62,7 +62,7 @@ java/
   - **models/**: Entidades de Dominio (Booking, Flight, Rocket), DTOs (Requests) y Excepciones
   - **ports/**: Interfaces para Repositorios y Servicios Externos (Output Ports)
   - **Services**: Implementación de la lógica de negocio (Input Ports)
-- **providers**: Implementaciones de Infraestructura (Adaptadores)
+- **adapters**: Implementaciones de Infraestructura (Adaptadores)
   - Implementaciones en memoria de los repositorios
   - Implementaciones simuladas de servicios externos (Payment, Notification)
   - Factorías para la inyección de dependencias de infraestructura
@@ -122,13 +122,13 @@ El núcleo de negocio define interfaces (puertos) para sus dependencias:
 - `BookingRepository`, `PaymentGateway`, etc. (en `business/ports`)
 
 #### 2. Implementaciones (Adaptadores)
-Las implementaciones concretas residen en la capa de infraestructura (`providers`):
+Las implementaciones concretas residen en la capa de infraestructura (`adapters`):
 - `InMemoryBookingRepository`, `PaymentGatewayImpl`, etc.
 
 #### 3. Inyección de Dependencias (AppConfig)
 La clase `AppConfig` (en `app`) actúa como el "Composition Root". Es responsable de instanciar los adaptadores y los servicios, inyectando las dependencias necesarias.
 
-- **`RepositoryFactory`** y **`ExternalFactory`** (en `providers`): Proveen las instancias de los adaptadores.
+- **`RepositoryFactory`** y **`ExternalFactory`** (en `adapters`): Proveen las instancias de los adaptadores.
 - **`ServiceFactory`** (en `business`): Crea los servicios de negocio recibiendo las dependencias por constructor.
 
 ```java

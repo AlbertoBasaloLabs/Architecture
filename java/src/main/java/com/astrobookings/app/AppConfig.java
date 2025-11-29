@@ -1,5 +1,7 @@
 package com.astrobookings.app;
 
+import com.astrobookings.adapters.ExternalFactory;
+import com.astrobookings.adapters.RepositoryFactory;
 import com.astrobookings.business.BookingService;
 import com.astrobookings.business.FlightCancellationService;
 import com.astrobookings.business.FlightService;
@@ -10,8 +12,6 @@ import com.astrobookings.business.ports.FlightRepository;
 import com.astrobookings.business.ports.NotificationService;
 import com.astrobookings.business.ports.PaymentGateway;
 import com.astrobookings.business.ports.RocketRepository;
-import com.astrobookings.providers.ExternalFactory;
-import com.astrobookings.providers.RepositoryFactory;
 
 /**
  * Application configuration layer.

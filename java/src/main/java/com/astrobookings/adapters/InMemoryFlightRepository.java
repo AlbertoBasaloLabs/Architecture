@@ -1,4 +1,4 @@
-package com.astrobookings.providers;
+package com.astrobookings.adapters;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

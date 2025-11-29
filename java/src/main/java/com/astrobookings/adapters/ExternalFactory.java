@@ -1,4 +1,4 @@
-package com.astrobookings.providers;
+package com.astrobookings.adapters;
 
 import com.astrobookings.business.ports.NotificationService;
 import com.astrobookings.business.ports.PaymentGateway;
