@@ -7,9 +7,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.astrobookings.business.BookingService;
-import com.astrobookings.business.domain.Booking;
+import com.astrobookings.business.models.Booking;
 import com.astrobookings.business.models.CreateBookingRequest;
-import com.astrobookings.config.AppConfig;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 

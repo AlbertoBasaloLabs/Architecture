@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import com.astrobookings.business.domain.Booking;
-import com.astrobookings.business.domain.Flight;
-import com.astrobookings.business.domain.FlightStatus;
-import com.astrobookings.business.ports.out.BookingRepository;
-import com.astrobookings.business.ports.out.FlightRepository;
-import com.astrobookings.business.ports.out.NotificationService;
-import com.astrobookings.business.ports.out.PaymentGateway;
+import com.astrobookings.business.models.Booking;
+import com.astrobookings.business.models.Flight;
+import com.astrobookings.business.models.FlightStatus;
+import com.astrobookings.business.ports.BookingRepository;
+import com.astrobookings.business.ports.FlightRepository;
+import com.astrobookings.business.ports.NotificationService;
+import com.astrobookings.business.ports.PaymentGateway;
 
 class FlightCancellationServiceImpl implements FlightCancellationService {
   private final FlightRepository flightRepository;
@@ -18,7 +18,8 @@ class FlightCancellationServiceImpl implements FlightCancellationService {
   private final PaymentGateway paymentGateway;
   private final NotificationService notificationService;
 
-  public FlightCancellationServiceImpl(FlightRepository flightRepository, BookingRepository bookingRepository, PaymentGateway paymentGateway, NotificationService notificationService) {
+  public FlightCancellationServiceImpl(FlightRepository flightRepository, BookingRepository bookingRepository,
+      PaymentGateway paymentGateway, NotificationService notificationService) {
     this.flightRepository = flightRepository;
     this.bookingRepository = bookingRepository;
     this.paymentGateway = paymentGateway;

@@ -1,4 +1,4 @@
-package com.astrobookings.business.exceptions;
+package com.astrobookings.business.models;
 
 public class ValidationException extends RuntimeException {
   public ValidationException(String message) {

@@ -5,9 +5,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import com.astrobookings.business.FlightService;
-import com.astrobookings.business.domain.Flight;
 import com.astrobookings.business.models.CreateFlightRequest;
-import com.astrobookings.config.AppConfig;
+import com.astrobookings.business.models.Flight;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 

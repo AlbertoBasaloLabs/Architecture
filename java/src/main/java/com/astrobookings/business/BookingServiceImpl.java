@@ -5,19 +5,19 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
-import com.astrobookings.business.domain.Booking;
-import com.astrobookings.business.domain.Flight;
-import com.astrobookings.business.domain.FlightStatus;
-import com.astrobookings.business.domain.Rocket;
-import com.astrobookings.business.exceptions.NotFoundException;
-import com.astrobookings.business.exceptions.PaymentException;
-import com.astrobookings.business.exceptions.ValidationException;
+import com.astrobookings.business.models.Booking;
 import com.astrobookings.business.models.CreateBookingRequest;
-import com.astrobookings.business.ports.out.BookingRepository;
-import com.astrobookings.business.ports.out.FlightRepository;
-import com.astrobookings.business.ports.out.NotificationService;
-import com.astrobookings.business.ports.out.PaymentGateway;
-import com.astrobookings.business.ports.out.RocketRepository;
+import com.astrobookings.business.models.Flight;
+import com.astrobookings.business.models.FlightStatus;
+import com.astrobookings.business.models.NotFoundException;
+import com.astrobookings.business.models.PaymentException;
+import com.astrobookings.business.models.Rocket;
+import com.astrobookings.business.models.ValidationException;
+import com.astrobookings.business.ports.BookingRepository;
+import com.astrobookings.business.ports.FlightRepository;
+import com.astrobookings.business.ports.NotificationService;
+import com.astrobookings.business.ports.PaymentGateway;
+import com.astrobookings.business.ports.RocketRepository;
 
 class BookingServiceImpl implements BookingService {
   private final FlightRepository flightRepository;
@@ -26,7 +26,8 @@ class BookingServiceImpl implements BookingService {
   private final PaymentGateway paymentGateway;
   private final NotificationService notificationService;
 
-  public BookingServiceImpl(BookingRepository bookingRepository, FlightRepository flightRepository, RocketRepository rocketRepository, PaymentGateway paymentGateway, NotificationService notificationService) {
+  public BookingServiceImpl(BookingRepository bookingRepository, FlightRepository flightRepository,
+      RocketRepository rocketRepository, PaymentGateway paymentGateway, NotificationService notificationService) {
     this.bookingRepository = bookingRepository;
     this.flightRepository = flightRepository;
     this.rocketRepository = rocketRepository;

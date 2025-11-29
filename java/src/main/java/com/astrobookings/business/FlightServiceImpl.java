@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.astrobookings.business.domain.Flight;
-import com.astrobookings.business.domain.FlightStatus;
-import com.astrobookings.business.exceptions.NotFoundException;
-import com.astrobookings.business.exceptions.ValidationException;
 import com.astrobookings.business.models.CreateFlightRequest;
-import com.astrobookings.business.ports.out.FlightRepository;
-import com.astrobookings.business.ports.out.RocketRepository;
+import com.astrobookings.business.models.Flight;
+import com.astrobookings.business.models.FlightStatus;
+import com.astrobookings.business.models.NotFoundException;
+import com.astrobookings.business.models.ValidationException;
+import com.astrobookings.business.ports.FlightRepository;
+import com.astrobookings.business.ports.RocketRepository;
 
 class FlightServiceImpl implements FlightService {
   private final FlightRepository flightRepository;

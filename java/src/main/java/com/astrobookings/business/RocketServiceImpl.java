@@ -3,10 +3,10 @@ package com.astrobookings.business;
 import java.util.List;
 import java.util.UUID;
 
-import com.astrobookings.business.domain.Rocket;
-import com.astrobookings.business.exceptions.ValidationException;
 import com.astrobookings.business.models.CreateRocketRequest;
-import com.astrobookings.business.ports.out.RocketRepository;
+import com.astrobookings.business.models.Rocket;
+import com.astrobookings.business.models.ValidationException;
+import com.astrobookings.business.ports.RocketRepository;
 
 class RocketServiceImpl implements RocketService {
   private final RocketRepository rocketRepository;
