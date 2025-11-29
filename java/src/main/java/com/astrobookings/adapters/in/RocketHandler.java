@@ -1,0 +1,55 @@
+package com.astrobookings.adapters.in;
+
+import com.astrobookings.config.AppConfig;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+import com.astrobookings.core.application.RocketService;
+import com.astrobookings.core.domain.models.CreateRocketRequest;
+import com.astrobookings.core.domain.models.Rocket;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+
+public class RocketHandler extends BaseHandler implements HttpHandler {
+  private RocketService rocketService = AppConfig.getRocketService();
+
+  @Override
+  public void handle(HttpExchange exchange) throws IOException {
+    String method = exchange.getRequestMethod();
+
+    switch (method) {
+      case "GET" -> handleGet(exchange);
+      case "POST" -> handlePost(exchange);
+      default -> exchange.sendResponseHeaders(405, -1);
+    }
+  }
+
+  private void handleGet(HttpExchange exchange) throws IOException {
+    List<Rocket> rockets = rocketService.findAllRockets();
+    sendJsonResponse(exchange, 200, rockets);
+  }
+
+  private void handlePost(HttpExchange exchange) throws IOException {
+    try {
+      InputStream is = exchange.getRequestBody();
+      CreateRocketRequest request = objectMapper.readValue(is, CreateRocketRequest.class);
+      validateRocketRequest(request);
+      Rocket rocket = rocketService.createRocket(request);
+      sendJsonResponse(exchange, 201, rocket);
+    } catch (Exception e) {
+      handleBusinessException(exchange, e);
+    }
+  }
+
+  private void validateRocketRequest(CreateRocketRequest request) {
+    if (request.name() == null || request.name().trim().isEmpty()) {
+      throw new IllegalArgumentException("Rocket name is required");
+    }
+    if (request.capacity() == null) {
+      throw new IllegalArgumentException("Capacity is required");
+    }
+  }
+}
+

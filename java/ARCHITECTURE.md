@@ -37,52 +37,50 @@ AstroBookings es una aplicación de reservas de viajes espaciales implementada c
 ```
 java/
 ├── src/main/java/com/astrobookings/
-│   ├── app/                          # HTTP Handlers & Config (Presentation Layer)
-│   │   ├── *.java                    # HTTP Handlers (Admin, Base, Booking, Flight, Rocket)
+│   ├── adapters/
+│   │   ├── in/                       # Input Adapters (Rest Handlers)
+│   │   │   ├── *.java                # HTTP Handlers
+│   │   │   └── BaseHandler.java
+│   │   └── out/                      # Output Adapters (Infrastructure)
+│   │       ├── InMemory*Repository.java
+│   │       ├── *Impl.java            # Gateways
+│   │       ├── RepositoryFactory.java
+│   │       └── ExternalFactory.java
+│   ├── config/                       # Configuration
 │   │   └── AppConfig.java
-│   ├── business/                     # Core Business Logic (Hexagon)
-│   │   ├── models/                   # Domain Entities, DTOs, Exceptions
-│   │   ├── ports/                    # Output Ports (Repository & Gateway Interfaces)
-│   │   ├── *Service.java             # Service Interfaces
-│   │   ├── *ServiceImpl.java         # Service Implementations
-│   │   └── ServiceFactory.java
-│   ├── adapters/                    # Infrastructure Adapters
-│   │   ├── InMemory*Repository.java  # Repository Implementations
-│   │   ├── *Impl.java                # Gateway Implementations (Payment, Notification)
-│   │   ├── RepositoryFactory.java
-│   │   └── ExternalFactory.java
+│   ├── core/
+│   │   ├── application/              # Application Layer (Use Cases & Ports)
+│   │   │   ├── ports/                # Output Ports
+│   │   │   ├── *Service.java         # Input Ports (Interfaces)
+│   │   │   ├── *ServiceImpl.java     # Application Services (Implementations)
+│   │   │   └── ServiceFactory.java
+│   │   └── domain/                   # Domain Layer
+│   │       └── models/               # Entities, DTOs, Exceptions
 │   └── AstroBookingsApp.java
 ```
 
 **Capas**:
-- **app**: Handlers HTTP para validación de estructura y Configuración
-  - Handlers: Rocket, Flight, Booking, Admin, BaseHandler
-  - AppConfig: Configuración de la aplicación
-- **business**: Lógica de Negocio, Modelos y Puertos
-  - **models/**: Entidades de Dominio (Booking, Flight, Rocket), DTOs (Requests) y Excepciones
-  - **ports/**: Interfaces para Repositorios y Servicios Externos (Output Ports)
-  - **Services**: Implementación de la lógica de negocio (Input Ports)
-- **adapters**: Implementaciones de Infraestructura (Adaptadores)
-  - Implementaciones en memoria de los repositorios
-  - Implementaciones simuladas de servicios externos (Payment, Notification)
-  - Factorías para la inyección de dependencias de infraestructura
+- **Adapters In**: Adaptadores de entrada (Rest Handlers) que invocan a la capa de aplicación.
+- **Adapters Out**: Adaptadores de salida (Infraestructura) que implementan los puertos de salida.
+- **Core Application**: Lógica de aplicación, casos de uso (Servicios) y definición de puertos.
+- **Core Domain**: Lógica de dominio puro, entidades y modelos.
+- **Config**: Configuración y composición de dependencias (AppConfig).
 
 ## Mejoras de Responsabilidad por Capas
 
 ### Separación de Validaciones
 
-**Validación de Estructura (Capa de Aplicación)**:
-- Handlers validan que los campos requeridos existan y tengan el tipo correcto
-- Ejemplo: `FlightHandler` valida que `rocketId`, `departureDate` y `basePrice` estén presentes
-- Los handlers pasan objetos `CreateXxxRequest` completos a los servicios
+**Validación de Estructura (Adapters In)**:
+- Handlers validan que los campos requeridos existan y tengan el tipo correcto.
+- Ejemplo: `FlightHandler` valida que `rocketId`, `departureDate` y `basePrice` estén presentes.
 
-**Validación de Negocio (Capa de Negocio)**:
-- Services validan reglas de negocio y parsean datos
-- Ejemplo: `FlightService` valida que la fecha sea futura, no exceda 1 año, y parsea el string a `LocalDateTime`
+**Validación de Negocio (Core Application)**:
+- Services validan reglas de negocio y parsean datos.
+- Ejemplo: `FlightService` valida que la fecha sea futura.
 
-### Request Models en la Capa de Negocio
+### Request Models en el Dominio
 
-Los modelos de entrada están en `business/models` como **Records anémicos**:
+Los modelos de entrada están en `core/domain/models` como **Records anémicos**:
 
 ```java
 public record CreateFlightRequest(String rocketId, String departureDate, Double basePrice) {}
@@ -90,46 +88,31 @@ public record CreateBookingRequest(String flightId, String passengerName) {}
 public record CreateRocketRequest(String name, Integer capacity, Double speed) {}
 ```
 
-**Ventajas**:
-- **Firmas limpias**: Los servicios reciben un objeto en lugar de múltiples parámetros
-- **Reutilización**: Los mismos modelos se pueden usar desde cualquier interfaz (REST, CLI, tests)
-- **Encapsulación**: Los servicios no dependen de detalles HTTP
-- **Evolución**: Añadir campos no rompe las firmas de métodos
-
 ### Excepciones Personalizadas
 
 Reemplazo de excepciones genéricas por excepciones específicas de negocio:
-
-- **ValidationException** (400 Bad Request): Errores de validación de negocio
-- **NotFoundException** (404 Not Found): Recursos no encontrados
-- **PaymentException** (402 Payment Required): Errores de procesamiento de pago
+- **ValidationException** (400 Bad Request)
+- **NotFoundException** (404 Not Found)
+- **PaymentException** (402 Payment Required)
 
 ### Manejo Centralizado de Errores
 
-`BaseHandler.handleBusinessException()` mapea excepciones a códigos HTTP:
-- `ValidationException` → 400
-- `NotFoundException` → 404
-- `PaymentException` → 402
-- `IllegalArgumentException` (validación de estructura) → 400
-- Otros → 500
+`BaseHandler.handleBusinessException()` mapea excepciones a códigos HTTP.
 
 ### Inversión de Dependencias y Configuración
 
 Se ha implementado un patrón de **Inversión de Dependencias** para desacoplar las capas.
 
 #### 1. Interfaces (Puertos)
-El núcleo de negocio define interfaces (puertos) para sus dependencias:
-- `BookingRepository`, `PaymentGateway`, etc. (en `business/ports`)
+El núcleo de aplicación define interfaces (puertos) para sus dependencias:
+- `BookingRepository`, `PaymentGateway`, etc. (en `core/application/ports`)
 
 #### 2. Implementaciones (Adaptadores)
-Las implementaciones concretas residen en la capa de infraestructura (`adapters`):
+Las implementaciones concretas residen en la capa de adaptadores de salida (`adapters/out`):
 - `InMemoryBookingRepository`, `PaymentGatewayImpl`, etc.
 
 #### 3. Inyección de Dependencias (AppConfig)
-La clase `AppConfig` (en `app`) actúa como el "Composition Root". Es responsable de instanciar los adaptadores y los servicios, inyectando las dependencias necesarias.
-
-- **`RepositoryFactory`** y **`ExternalFactory`** (en `adapters`): Proveen las instancias de los adaptadores.
-- **`ServiceFactory`** (en `business`): Crea los servicios de negocio recibiendo las dependencias por constructor.
+La clase `AppConfig` (en `config`) actúa como el "Composition Root".
 
 ```java
 // En AppConfig.java
@@ -141,68 +124,62 @@ private static final BookingService bookingService = ServiceFactory.createBookin
 );
 ```
 
-Este diseño permite:
-- **Desacoplamiento**: El núcleo de negocio no depende de implementaciones concretas.
-- **Testabilidad**: Facilita la inyección de mocks en los tests unitarios de los servicios.
-- **Flexibilidad**: Cambiar una implementación (ej. de memoria a base de datos) solo requiere cambios en la configuración (`AppConfig` y Factorías).
-
 ## Flujo de Datos
 
 ### Crear Reserva (POST /bookings)
 ```
-Application Layer
+Adapters In
   └─ BookingHandler
        ├─ Deserializes JSON → CreateBookingRequest
-       ├─ Validates structure (fields exist)
+       ├─ Validates structure
        └─ Passes CreateBookingRequest to service
             ↓
-          Business Layer
+          Core Application
             └─ BookingService.createBooking(CreateBookingRequest)
                  ├─ Validates business rules
                  ├─ PaymentGateway (process payment)
                  └─ NotificationService (if flight confirmed)
                       ↓
-                    Persistence Layer
+                    Adapters Out (Persistence)
                       ├─ BookingRepository (save booking)
                       └─ FlightRepository (update flight status)
                            ↓
-                         Domain Models
+                         Core Domain
                            ├─ Booking (with paymentTransactionId)
                            └─ Flight (status: SCHEDULED → CONFIRMED)
 ```
 
 ### Crear Vuelo (POST /flights)
 ```
-Application Layer
+Adapters In
   └─ FlightHandler
        ├─ Deserializes JSON → CreateFlightRequest
-       ├─ Validates structure (fields exist)
+       ├─ Validates structure
        └─ Passes CreateFlightRequest to service
             ↓
-          Business Layer
+          Core Application
             └─ FlightService.createFlight(CreateFlightRequest)
                  ├─ Validates business rules
-                 ├─ Parses departureDate string → LocalDateTime
                  └─ Verifies rocket exists
                       ↓
-                    Persistence Layer
+                    Adapters Out (Persistence)
                       ├─ FlightRepository (save flight)
                       └─ RocketRepository (verify rocket exists)
 ```
 
 ### Crear Cohete (POST /rockets)
 ```
-Application Layer
+Adapters In
   └─ RocketHandler
        ├─ Deserializes JSON → CreateRocketRequest
-       ├─ Validates structure (fields exist)
+       ├─ Validates structure
        └─ Passes CreateRocketRequest to service
             ↓
-          Business Layer
+          Core Application
             └─ RocketService.createRocket(CreateRocketRequest)
-                 └─ Validates business rules (capacity <= 10)
+                 └─ Validates business rules
                       ↓
-                    Persistence Layer
+                    Adapters Out (Persistence)
                       └─ RocketRepository (save rocket)
 ```
 
