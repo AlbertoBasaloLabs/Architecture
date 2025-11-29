@@ -37,16 +37,16 @@ AstroBookings es una aplicación de reservas de viajes espaciales implementada c
 ```
 java/
 ├── src/main/java/com/astrobookings/
-│   ├── app/            # HTTP Handlers & Config (Presentation Layer)
-│   │   ├── *.java      # HTTP Handlers (Admin, Base, Booking, Flight, Rocket)
+│   ├── app/                          # HTTP Handlers & Config (Presentation Layer)
+│   │   ├── *.java                    # HTTP Handlers (Admin, Base, Booking, Flight, Rocket)
 │   │   └── AppConfig.java
-│   ├── business/       # Core Business Logic (Hexagon)
-│   │   ├── models/     # Domain Entities, DTOs, Exceptions
-│   │   ├── ports/      # Output Ports (Repository & Gateway Interfaces)
-│   │   ├── *Service.java       # Input Ports (Service Interfaces)
-│   │   ├── *ServiceImpl.java   # Service Implementations
+│   ├── business/                     # Core Business Logic (Hexagon)
+│   │   ├── models/                   # Domain Entities, DTOs, Exceptions
+│   │   ├── ports/                    # Output Ports (Repository & Gateway Interfaces)
+│   │   ├── *Service.java             # Service Interfaces
+│   │   ├── *ServiceImpl.java         # Service Implementations
 │   │   └── ServiceFactory.java
-│   ├── providers/      # Infrastructure Adapters
+│   ├── providers/                    # Infrastructure Adapters
 │   │   ├── InMemory*Repository.java  # Repository Implementations
 │   │   ├── *Impl.java                # Gateway Implementations (Payment, Notification)
 │   │   ├── RepositoryFactory.java

@@ -1,6 +1,8 @@
 # 3 Ports Adapters
 
-Conectividad que cambia la dependencia: puertos y adaptadores
+<! -- TODO: Valorar renombrar a Driven Ports -->
+
+La conectividad que cambia la dependencia: puertos y adaptadores
 
 ## 1. CONNECT 
 
@@ -24,12 +26,12 @@ Conectividad que cambia la dependencia: puertos y adaptadores
 ### Ideas fundamentales:
 
 - El flujo de dependencias va de fuera (detalles) hacia dentro (dominio).
-- La logica de negocio se encuentra en el núcleo (dominio).
+- La logica de negocio se encuentra en el núcleo (dominio) y es independiente de los detalles.
 
 ## 3. CONCRETE PRACTICE 
 Partimos de un diseño flexible con interfaces y factorías.
 
-Aplicar el patrón ports y adapters en la capa de infraestructura (Driven Adapters).
+Aplicar el patrón **ports y adapters** en la capa de infraestructura (Driven Adapters).
 
 - Driven Adapters (capas de negocio e infraestructura)
     - [ ] Las interfaces de infraestructura pasan a ser ports expuestos desde el núcleo.
