@@ -37,34 +37,35 @@ AstroBookings es una aplicación de reservas de viajes espaciales implementada c
 ```
 java/
 ├── src/main/java/com/astrobookings/
-│   ├── app/            # HTTP Handlers (Presentation Layer)
-│   │   └── *.Handler   # HTTP request handlers
-│   ├── business/       # Services, Models & Exceptions (Business Layer)
-│   │   ├── exceptions/ # Custom business exceptions
-│   │   ├── models/     # Request models (anemic records)
-│   │   ├── *Service.java       # Service Interfaces
-│   │   ├── *ServiceImpl.java   # Service Implementations (package-private)
-│   │   └── ServiceFactory.java # Factory for Services
-│   ├── providers/      # Repositories & Domain Models (Data Layer)
-│   │   ├── models/     # Domain entities
-│   │   ├── *Repository.java        # Repository Interfaces
-│   │   ├── InMemory*Repository.java # Repository Implementations (package-private)
-│   │   └── RepositoryFactory.java  # Factory for Repositories
+│   ├── app/            # HTTP Handlers & Config (Presentation Layer)
+│   │   ├── *.java      # HTTP Handlers (Admin, Base, Booking, Flight, Rocket)
+│   │   └── AppConfig.java
+│   ├── business/       # Core Business Logic (Hexagon)
+│   │   ├── models/     # Domain Entities, DTOs, Exceptions
+│   │   ├── ports/      # Output Ports (Repository & Gateway Interfaces)
+│   │   ├── *Service.java       # Input Ports (Service Interfaces)
+│   │   ├── *ServiceImpl.java   # Service Implementations
+│   │   └── ServiceFactory.java
+│   ├── providers/      # Infrastructure Adapters
+│   │   ├── InMemory*Repository.java  # Repository Implementations
+│   │   ├── *Impl.java                # Gateway Implementations (Payment, Notification)
+│   │   ├── RepositoryFactory.java
+│   │   └── ExternalFactory.java
 │   └── AstroBookingsApp.java
 ```
 
 **Capas**:
-- **app**: Handlers HTTP para validación de estructura
+- **app**: Handlers HTTP para validación de estructura y Configuración
   - Handlers: Rocket, Flight, Booking, Admin, BaseHandler
-  - Validan que los campos requeridos existan antes de pasar a servicios
-- **business**: Services + Request Models + Excepciones personalizadas
-  - **models/**: Request models anémicos (CreateFlightRequest, CreateBookingRequest, CreateRocketRequest)
-  - **Services**: RocketService, FlightService, BookingService, FlightCancellationService
-  - **Gateways**: PaymentGateway, NotificationService
-  - **Exceptions**: ValidationException, NotFoundException, PaymentException
-- **providers**: Repositories + Modelos de dominio
-  - Repositories: RocketRepository, FlightRepository, BookingRepository
-  - Models: Rocket, Flight, Booking, FlightStatus
+  - AppConfig: Configuración de la aplicación
+- **business**: Lógica de Negocio, Modelos y Puertos
+  - **models/**: Entidades de Dominio (Booking, Flight, Rocket), DTOs (Requests) y Excepciones
+  - **ports/**: Interfaces para Repositorios y Servicios Externos (Output Ports)
+  - **Services**: Implementación de la lógica de negocio (Input Ports)
+- **providers**: Implementaciones de Infraestructura (Adaptadores)
+  - Implementaciones en memoria de los repositorios
+  - Implementaciones simuladas de servicios externos (Payment, Notification)
+  - Factorías para la inyección de dependencias de infraestructura
 
 ## Mejoras de Responsabilidad por Capas
 
@@ -112,39 +113,38 @@ Reemplazo de excepciones genéricas por excepciones específicas de negocio:
 - `IllegalArgumentException` (validación de estructura) → 400
 - Otros → 500
 
-### Inversión de Dependencias y Factorías
+### Inversión de Dependencias y Configuración
 
-Se ha implementado un patrón de **Inversión de Dependencias** manual para desacoplar las capas y mejorar la mantenibilidad.
+Se ha implementado un patrón de **Inversión de Dependencias** para desacoplar las capas.
 
-#### 1. Interfaces (Contratos)
-Cada componente de negocio y persistencia define su contrato a través de una interfaz pública:
-- `BookingService`, `FlightService`, `RocketService`
-- `BookingRepository`, `FlightRepository`, `RocketRepository`
+#### 1. Interfaces (Puertos)
+El núcleo de negocio define interfaces (puertos) para sus dependencias:
+- `BookingRepository`, `PaymentGateway`, etc. (en `business/ports`)
 
-#### 2. Implementaciones Ocultas
-Las implementaciones concretas son **package-private** (sin modificador de acceso público) para impedir su instanciación directa desde otras capas:
-- `BookingServiceImpl`, `InMemoryBookingRepository`, etc.
-- Esto obliga a los consumidores a depender únicamente de las interfaces.
+#### 2. Implementaciones (Adaptadores)
+Las implementaciones concretas residen en la capa de infraestructura (`providers`):
+- `InMemoryBookingRepository`, `PaymentGatewayImpl`, etc.
 
-#### 3. Factorías Estáticas
-Se utilizan factorías para proveer las instancias, actuando como un contenedor de inyección de dependencias simple:
+#### 3. Inyección de Dependencias (AppConfig)
+La clase `AppConfig` (en `app`) actúa como el "Composition Root". Es responsable de instanciar los adaptadores y los servicios, inyectando las dependencias necesarias.
 
-- **`ServiceFactory`**: Punto de acceso único para la capa de Aplicación (`app`).
-  ```java
-  // En BookingHandler.java
-  private BookingService bookingService = ServiceFactory.getBookingService();
-  ```
+- **`RepositoryFactory`** y **`ExternalFactory`** (en `providers`): Proveen las instancias de los adaptadores.
+- **`ServiceFactory`** (en `business`): Crea los servicios de negocio recibiendo las dependencias por constructor.
 
-- **`RepositoryFactory`**: Punto de acceso único para la capa de Negocio (`business`).
-  ```java
-  // En BookingServiceImpl.java
-  private BookingRepository bookingRepository = RepositoryFactory.getBookingRepository();
-  ```
+```java
+// En AppConfig.java
+private static final BookingRepository bookingRepo = RepositoryFactory.getBookingRepository();
+private static final PaymentGateway paymentGateway = ExternalFactory.getPaymentGateway();
+
+private static final BookingService bookingService = ServiceFactory.createBookingService(
+    bookingRepo, ..., paymentGateway, ...
+);
+```
 
 Este diseño permite:
-- **Desacoplamiento**: Las capas superiores no conocen los detalles de implementación de las inferiores.
-- **Testabilidad**: Facilita la creación de mocks para tests unitarios (aunque en esta fase usamos implementaciones en memoria).
-- **Flexibilidad**: Cambiar de `InMemoryRepository` a `SqlRepository` solo requiere cambiar la factoría, sin tocar los servicios.
+- **Desacoplamiento**: El núcleo de negocio no depende de implementaciones concretas.
+- **Testabilidad**: Facilita la inyección de mocks en los tests unitarios de los servicios.
+- **Flexibilidad**: Cambiar una implementación (ej. de memoria a base de datos) solo requiere cambios en la configuración (`AppConfig` y Factorías).
 
 ## Flujo de Datos
 
@@ -220,119 +220,6 @@ java -jar target/astrobookings-1.0-SNAPSHOT.jar
 
 Ver [README.md](README.md) para instrucciones detalladas.
 
----
+## Diagrama de Componentes
 
-## Diagrama C4 - Nivel 3 (Componentes)
-
-```mermaid
-graph TB
-    subgraph "AstroBookings Application"
-        subgraph "Application Layer"
-            RH[RocketHandler]
-            FH[FlightHandler]
-            BH[BookingHandler]
-            AH[AdminHandler]
-            BASE[BaseHandler]
-        end
-        
-        subgraph "Business Layer"
-            MODELS[Request Models]
-            RS[RocketService]
-            FS[FlightService]
-            BS[BookingService]
-            FCS[FlightCancellationService]
-            PG[PaymentGateway]
-            NS[NotificationService]
-            EXC[Custom Exceptions]
-        end
-        
-        subgraph "Persistence Layer"
-            RR[RocketRepository]
-            FR[FlightRepository]
-            BR[BookingRepository]
-        end
-        
-        subgraph "Domain Models"
-            ROCKET[Rocket]
-            FLIGHT[Flight]
-            BOOKING[Booking]
-            STATUS[FlightStatus]
-        end
-    end
-    
-    subgraph "External Systems"
-        PAYMENT[Payment Gateway API]
-        EMAIL[Email Service]
-    end
-    
-    CLIENT[HTTP Client]
-    
-    CLIENT -->|HTTP/JSON| RH
-    CLIENT -->|HTTP/JSON| FH
-    CLIENT -->|HTTP/JSON| BH
-    CLIENT -->|HTTP/JSON| AH
-    
-    RH --> BASE
-    FH --> BASE
-    BH --> BASE
-    AH --> BASE
-    
-    RH -->|CreateRocketRequest| MODELS
-    FH -->|CreateFlightRequest| MODELS
-    BH -->|CreateBookingRequest| MODELS
-    
-    MODELS --> RS
-    MODELS --> FS
-    MODELS --> BS
-    
-    RH --> RS
-    FH --> FS
-    BH --> BS
-    AH --> FCS
-    
-    RS --> RR
-    FS --> FR
-    FS --> RR
-    
-    BS --> BR
-    BS --> FR
-    BS --> RR
-    BS --> PG
-    BS --> NS
-    
-    FCS --> FR
-    FCS --> BR
-    FCS --> PG
-    FCS --> NS
-    
-    RS --> EXC
-    FS --> EXC
-    BS --> EXC
-    
-    BASE --> EXC
-    
-    PG -.->|Simulated| PAYMENT
-    NS -.->|Simulated| EMAIL
-    
-    RR --> ROCKET
-    FR --> FLIGHT
-    BR --> BOOKING
-    FLIGHT --> STATUS
-    
-    style PG fill:#00ccff,stroke:#333
-    style NS fill:#00ccff,stroke:#333
-    style MODELS fill:#90EE90,stroke:#333
-    style EXC fill:#FFB6C1,stroke:#333
-    style RS fill:#FFFFE0,stroke:#333
-    style PAYMENT fill:#ddd,stroke:#333,stroke-dasharray: 5 5
-    style EMAIL fill:#ddd,stroke:#333,stroke-dasharray: 5 5
-```
-
-**Leyenda**:
-- **Líneas sólidas**: Dependencias directas
-- **Líneas punteadas**: Servicios externos simulados
-- **Azul**: Gateways a servicios externos
-- **Verde**: Request Models (anemic records en business/models)
-- **Rosa**: Excepciones personalizadas
-- **Amarillo**: RocketService (añadido para eliminar acceso directo a repositorio)
-- **Gris**: Servicios externos (no implementados)
+El diagrama C4 de nivel 3 se encuentra en el fichero [components-diagram.md](components-diagram.md).
