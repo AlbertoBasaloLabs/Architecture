@@ -7,8 +7,8 @@ Taller de Arquitectura de Software. Evolución desde las capas hasta hexagonal, 
 
 ## Astro Bookings
 
-- [Briefing funcional](./astro.bookings.briefing.md)
-- [Product Requirements Document](./docs/astro.bookings.PRD.md)
+- [Briefing funcional](./astrobookings.briefing.md)
+- [Product Requirements Document](./docs/astrobookings.PRD.md)
 - [Java Implementation](./java/README.md)
 
 ---
