@@ -1,8 +1,15 @@
-# 3 Ports Adapters
+---
+title: "hexagonal domain"
+description: "La independencia del dominio."
+author: "Alberto Basalo"
+url: "3-hexagonal-domain.md"
+marp: true
+theme: ab
+---
 
-<! -- TODO: Valorar renombrar a Driven Ports -->
+# 3 Hexagonal domain
 
-La conectividad que cambia la dependencia: puertos y adaptadores
+El dominio es independiente de los detalles.
 
 ## 1. CONNECT 
 
@@ -11,47 +18,56 @@ La conectividad que cambia la dependencia: puertos y adaptadores
 - ¿Qué consecuencias tiene esta dependencia?
 
 > Objetivo: entender la necesidad de proteger la lógica de negocio.
-
+---
 ## 2. CONCEPT 
 
-### Principios clave:
+### Conceptos clave:
 
-- **Domain**: núcleo con la lógica de negocio de la aplicación.
+- **Domain**: núcleo con la lógica de negocio.
 - **Details**: el resto de la solución.
 - **Ports**: interfaces de comunicación.
 - **Adapters**: implementaciones concretas.
-- **Driving Adapters**: adaptadores que vienen desde el exterior.
-- **Driven Adapters**: adaptadores que vienen desde el interior.
 
 ### Ideas fundamentales:
 
-- El flujo de dependencias va de fuera (detalles) hacia dentro (dominio).
-- La lógica de negocio se encuentra en el núcleo (dominio) y es independiente de los detalles.
-
+- La lógica de negocio es independiente de los detalles.
+- El dominio expone sus necesidades de uso mediante ports.
+- La solución implementa los ports mediante adapters.
+---
 ## 3. CONCRETE PRACTICE 
-Partimos de un diseño flexible con interfaces y factorías.
+Partimos de capas de responsabilidad única y persistencia abstracta.
 
-Aplicar el patrón **ports y adapters** en la capa de infraestructura (Driven Adapters).
-
-- Driven Adapters (capas de negocio e infraestructura)
-    - [ ] Las interfaces de infraestructura pasan a ser ports expuestos desde el núcleo.
-    - [ ] Las implementaciones de infraestructura quedan como adapters de los ports.
-    - [ ] Los servicios exponen sus necesidad de uso de ports.
-- Inversión del control de dependencias, configurando la capa de aplicación
-    - [ ] La capa de negocio no depende de ninguna otra capa.
-    - [ ] La capa de aplicación depende de la capa de negocio y de la capa de infraestructura.
-    - [ ] La capa de aplicación usa las factorías de infraestructura (Configuración) para obtener adaptadores.
-    - [ ] La capa de aplicación envía esos adaptadores a la capa de negocio.
-    - [ ] La capa de negocio usa sus ports sin conocer detalles de implementación.
-- No es necesario implementar Driving ports por el momento
-- Renombra la carpeta providers a adapters
+Aplicar el patrón **ports y adapters** en persistencia.
 
 > Objetivo: patrón ports y adapters y familiaridad con hexagonal architecture.
 
+---
+
+- Capa de negocio 
+    - [ ] La capa `business` se renombra como `domain`
+    - [ ] Las _interfaces_ de `infrastructure` pasan a ser _ports_ del `domain`.
+    - [ ] Los _services_ dependen de los _ports_ en el constructor.
+
+---
+- Capa de persistencia
+    - [ ] La capa `persistence` se renombra como `infrastructure`
+    - [ ] Pierde sus _interfaces_ y depende de los _ports_ de `domain`.
+    - [ ] Las implementaciones se quedan tal cual como _adapters_ de los _ports_.
+    - [ ] Se crea una _factoría_ que proporciona _adapters_.
+
+---
+- Capa de presentación
+    - [ ] No es necesario renombrar la capa `presentation` por el momento
+    - [ ] Depende de la capa de `domain` y de la _factoría_ de `infrastructure`.
+    - [ ] Usa la _factoría_ de `infrastructure` para obtener _adapters_.
+    - [ ] Envía los _adapters_ a los _services_ de  `domain`.
+
+---
+
 ## 4. CONCLUSIONS 
 
-- La lógica de negocio es lo más estable de la aplicación.
-- Los detalles puede cambiar con el tiempo.
+- Los patrones aportan claridad y consistencia.
+- El objetivo es fomentar la flexibilidad y _testability_.
 - La inversión del control permite la independencia de la lógica de negocio.
 
 - ¿Cómo de independiente es tu lógica de negocio?
